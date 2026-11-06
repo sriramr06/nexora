@@ -19,7 +19,7 @@ Turn the Phase 2 requirements and Phase 3 design into a sprint-by-sprint build p
 | Sprint length | 1 week (Sprint 1: 10 days) |
 | Planned duration | 7 sprints, ending 27 December 2026 |
 | Reserve | 28 December 2026 – 3 January 2027 (within the PID's 8-week ceiling) |
-| Tracking | GitHub Projects board; one issue per user story (US-01 – US-38), linked to pull requests |
+| Tracking | Sprint checklist per sprint in `docs/sprints/sprint-N.md` (stories and tasks as checkboxes); pull requests reference story IDs (e.g. "US-03") |
 | Sprint start | Select stories and tasks for the sprint (15 minutes) |
 | Sprint end | Review and retrospective notes in `docs/sprints/sprint-N.md` (15 minutes) |
 | Branching | Feature branches → pull request → protected `main` (DEP-7) |
