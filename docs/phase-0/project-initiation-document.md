@@ -1,7 +1,7 @@
 # Project Initiation Document (PID)
 
 **Project:** Nexora — Multi-Tenant Project Management SaaS  
-**Document Version:** 1.1  
+**Document Version:** 1.2  
 **Status:** Approved  
 **Development Approach:** Agile  
 **Platform:** Responsive Web Application
@@ -35,6 +35,16 @@ Each organization operates within its own isolated environment while sharing the
 - Comments and activity tracking.
 - In-app notifications.
 
+### 3.1 Approved Scope Additions (v1.2)
+
+Approved by the Project Owner during Phase 2 — Requirements Engineering:
+
+- Application Owner (platform-level) role with tenant approval and basic tenant management.
+- Organization registration form submitted for Application Owner approval.
+- Email-bound member invitations.
+- Transactional email: email verification, invitations and password reset.
+- User profile avatars stored via Cloudinary.
+
 ## 4. Out of Scope
 
 - Native mobile applications.
@@ -43,6 +53,9 @@ Each organization operates within its own isolated environment while sharing the
 - Third-party application marketplace.
 - Complex workflow automation.
 - Enterprise-level custom integrations.
+- Task file attachments (future enhancement).
+- Task transfer request and approval workflow (future enhancement).
+- Company email domain restriction for invitations (future enhancement).
 
 ## 5. Stakeholders
 
@@ -117,3 +130,4 @@ The project initiation stage is formally closed. Product Discovery is authorized
 | ------- | --------------- | ------------------------------------------------------------------------------------------------------------- |
 | 1.0     | 6 November 2026 | Initial approved document.                                                                                    |
 | 1.1     | 6 November 2026 | Project name confirmed as Nexora; terminology clarified. No change to approved scope, timeline or decisions. |
+| 1.2     | 6 November 2026 | Scope additions approved during Phase 2 (Section 3.1); out-of-scope list extended. Timeline unchanged.        |
