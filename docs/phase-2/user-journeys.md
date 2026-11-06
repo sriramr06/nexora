@@ -23,6 +23,7 @@ Describe complete end-to-end paths through Nexora. Journeys connect individual u
 | J7 | Member offboarding | Tenant Admin | US-15 |
 | J8 | Organization suspension | Application Owner | US-11 |
 | J9 | Account recovery | Any user | US-04 |
+| J10 | Review and blocker resolution | Team Member, Project Manager | US-25, US-36 – US-38 |
 
 ## 3. Journeys
 
@@ -112,10 +113,11 @@ Arun then invites his own team members (J4), reducing the Tenant Admin's workloa
 | 5 | Comments "API contract needed for error states" | Comment shown; task creator Arun notified |
 | 6 | Logs a bug as a new task and assigns it to herself | Task created in To Do with Meena as assignee |
 | 7 | Self-assigns an unassigned task | Becomes the assignee |
-| 8 | Moves "Login page UI" to In Review | Status updated; activity recorded |
+| 8 | Moves "Login page UI" to In Review | Submitted for review; activity recorded; Arun notified (continues in J10) |
 
-**Alternative path**
+**Alternative paths**
 - 4a. Meena tries to move a task assigned to someone else → card returns to its column with a permission error.
+- 8a. Meena drags "Login page UI" to Done → card returns with "Submit for review instead" (R14).
 
 ### J6 — Sudden Unavailability (Reassignment)
 
@@ -167,8 +169,29 @@ Arun then invites his own team members (J4), reducing the Tenant Admin's workloa
 | 2 | Opens the reset link within 1 hour | Sets a new password |
 | 3 | — | All other sessions signed out; user logs in with the new password |
 
+### J10 — Review and Blocker Resolution
+
+**Actors:** Meena (Team Member); Arun (Project Manager)  
+**Goal:** Get submitted work accepted and keep blocked work visible.
+
+| # | Step | System Response |
+|---|---|---|
+| 1 | Arun opens the notification "Meena submitted Login page UI for review" | Task detail opened |
+| 2 | Finds a missing error message; requests changes with reason "Error message missing for wrong password" | Task → In Progress; reason recorded in activity; Meena notified with the reason |
+| 3 | Meena fixes it and moves the task to In Review again | Arun notified |
+| 4 | Arun approves by moving it to Done | Task complete; Meena notified; completion percentage updated |
+| 5 | Meena starts "Payment integration" but lacks API credentials; marks it **Blocked** with reason "Waiting for payment API credentials from client" | Card stays in In Progress with a Blocked badge; Arun notified |
+| 6 | Meena has an urgent bug; marks "Profile page" **On hold** with reason "Paused for urgent production bug" | On hold badge shown; no notification |
+| 7 | Arun opens "Blocked tasks (1)" on the board | List shows the task, reason, Meena, and since when |
+| 8 | Credentials arrive; Arun clears the Blocked flag | Badge removed; activity recorded; Meena notified |
+| 9 | Meena finishes the bug and clears On hold on "Profile page" | Badge removed; work resumes |
+
+**Alternative paths**
+- 5a. Meena tries to move the Blocked task to In Review → refused until Arun clears the flag (R16).
+- 4a. Arun decides someone else should finish it → reassigns the task (J6).
+
 ## 4. Demo Script
 
-J1 → J2 → J3 → J4 → J5 → J6 forms a 10-minute portfolio demo covering tenancy, approval, invitations, RBAC, the Kanban board and collaboration. A second browser logged in as a user from another organization demonstrates tenant isolation (US-33).
+J1 → J2 → J3 → J4 → J5 → J10 → J6 forms a 10-minute portfolio demo covering tenancy, approval, invitations, RBAC, the Kanban board and collaboration. A second browser logged in as a user from another organization demonstrates tenant isolation (US-33).
 
 **Next step:** Step 2.6 — Non-Functional Requirements.

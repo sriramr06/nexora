@@ -10,7 +10,7 @@
 
 Define what the system shall do. Each requirement is uniquely identified, testable and traceable to user stories (Step 2.4) and automated tests.
 
-Permissions referenced below are defined in Step 2.2 — Roles and Permission Requirements. Business rules are referenced as R1–R13.
+Permissions referenced below are defined in Step 2.2 — Roles and Permission Requirements. Business rules are referenced as R1–R16.
 
 **Priority:** M = Must (MVP), S = Should (MVP if time allows).
 
@@ -45,7 +45,7 @@ Permissions referenced below are defined in Step 2.2 — Roles and Permission Re
 
 | ID | Requirement | Priority |
 |---|---|---|
-| FR-ORG-01 | The system shall allow a verified user to register an organization with: name, type (Product / Service / Both), company size (1–10, 11–50, 51–200, 201–500, 500+), industry, country, website (optional) and description (optional). | M |
+| FR-ORG-01 | The system shall allow a verified user to register an organization with: name, type (Product / Service / Both), company size (1–10, 11–50, 51–200, 201–500, 500+), industry, country, timezone (pre-filled from the browser), website (optional) and description (optional). | M |
 | FR-ORG-02 | The system shall create a submitted organization with status **Pending Approval** and make the submitter its Tenant Admin (R2). | M |
 | FR-ORG-03 | The system shall show members of a non-Active organization a status page (awaiting approval, rejected with reason, or suspended) instead of tenant content (R9). | M |
 | FR-ORG-04 | The system shall allow the Tenant Admin of a Rejected organization to edit its details and resubmit it, returning it to Pending Approval. | M |
@@ -100,7 +100,7 @@ Permissions referenced below are defined in Step 2.2 — Roles and Permission Re
 | FR-PROJ-05 | The system shall list only projects the user may access: all projects for Tenant Admins; member projects for others. | M |
 | FR-PROJ-06 | The system shall allow authorized users to archive and restore a project; archived projects are read-only (R7). | M |
 | FR-PROJ-07 | The system shall allow a Tenant Admin to permanently delete a project and all its tasks, comments and activity after explicit confirmation. | M |
-| FR-PROJ-08 | The system shall display a project summary: task count per status, overdue task count and completion percentage. | M |
+| FR-PROJ-08 | The system shall display a project summary: task count per status, overdue task count, blocked task count and completion percentage. | M |
 
 ## 8. Task Management (TASK)
 
@@ -108,15 +108,20 @@ Permissions referenced below are defined in Step 2.2 — Roles and Permission Re
 |---|---|---|
 | FR-TASK-01 | The system shall allow authorized users to create a task with title (required, 1–200 characters), description (optional, up to 5,000 characters), priority (default Medium), due date (optional) and assignee (optional). | M |
 | FR-TASK-02 | The system shall create new tasks with status **To Do**. | M |
-| FR-TASK-03 | The system shall support the statuses To Do, In Progress, In Review and Done, and allow any transition between them. | M |
+| FR-TASK-03 | The system shall support the statuses To Do, In Progress, In Review and Done, and enforce the status transition permissions of the review rule (R14). | M |
 | FR-TASK-04 | The system shall support the priorities Low, Medium, High and Urgent. | M |
 | FR-TASK-05 | The system shall allow a task to have at most one assignee, who must be a project member (R4). | M |
 | FR-TASK-06 | The system shall restrict Team Members to leaving a task unassigned or assigning it to themselves. | M |
 | FR-TASK-07 | The system shall allow Tenant Admins and the project's manager to reassign or unassign a task. | M |
 | FR-TASK-08 | The system shall allow authorized users to edit task details according to the permission matrix. | M |
 | FR-TASK-09 | The system shall allow Tenant Admins and the project's manager to delete a task after confirmation. | M |
-| FR-TASK-10 | The system shall mark a task as overdue when its due date has passed and its status is not Done. | M |
+| FR-TASK-10 | The system shall mark a task as overdue when its status is not Done and its due date is earlier than the current date in the organization's timezone. | M |
 | FR-TASK-11 | The system shall provide a "My Tasks" list of the user's assigned tasks across accessible projects in the active organization, filterable by status and sortable by due date. | M |
+| FR-TASK-12 | The system shall allow the assignee to submit a task for review by moving it to In Review, and to withdraw it to In Progress before it is reviewed. | M |
+| FR-TASK-13 | The system shall allow only the project's manager or a Tenant Admin to move a task to Done, to request changes (In Review → In Progress with a required reason of 1–500 characters), and to reopen a Done task. | M |
+| FR-TASK-14 | The system shall allow a task to carry at most one flag — Blocked or On hold — with a required reason (1–500 characters), the user who set it and the time it was set (R15). | M |
+| FR-TASK-15 | The system shall allow the assignee, the project's manager and Tenant Admins to mark a task Blocked or On hold, and to clear On hold; only the project's manager and Tenant Admins can clear Blocked (R16). | M |
+| FR-TASK-16 | The system shall prevent the assignee from changing the status of a Blocked task, prevent flagging Done tasks, and clear any flag when a task moves to Done. | M |
 
 ## 9. Kanban Board (BOARD)
 
@@ -124,11 +129,13 @@ Permissions referenced below are defined in Step 2.2 — Roles and Permission Re
 |---|---|---|
 | FR-BOARD-01 | The system shall display each project's tasks on a board with one column per status. | M |
 | FR-BOARD-02 | The system shall sort cards within a column by priority (Urgent first), then due date (earliest first). | M |
-| FR-BOARD-03 | The system shall allow authorized users to change a task's status by dragging its card to another column. | M |
+| FR-BOARD-03 | The system shall allow authorized users to change a task's status by dragging its card to another column; drops the user is not permitted to make (e.g. a Team Member dropping onto Done) are reverted with an explanatory message. | M |
 | FR-BOARD-04 | The system shall provide a non-drag way to change status from the card or task detail view. | M |
 | FR-BOARD-05 | The system shall revert a card to its original column and show an error if a status change fails. | M |
-| FR-BOARD-06 | The system shall allow filtering the board by assignee (including "Unassigned") and priority. | M |
-| FR-BOARD-07 | Each card shall show title, priority, assignee avatar, due date and an overdue indicator. | M |
+| FR-BOARD-06 | The system shall allow filtering the board by assignee (including "Unassigned"), priority and flag (Blocked, On hold). | M |
+| FR-BOARD-07 | Each card shall show title, priority, assignee avatar, due date, an overdue indicator and a Blocked or On hold badge with its reason. | M |
+| FR-BOARD-08 | The system shall keep flagged tasks in their status column. | M |
+| FR-BOARD-09 | The system shall provide a "Blocked tasks" control showing the project's blocked task count, which opens a list of blocked tasks with reason, assignee, who flagged it and since when. | M |
 
 ## 10. Comments (COM)
 
@@ -143,7 +150,7 @@ Permissions referenced below are defined in Step 2.2 — Roles and Permission Re
 
 | ID | Requirement | Priority |
 |---|---|---|
-| FR-ACT-01 | The system shall record an activity entry (actor, action, target, changes, timestamp) for: task created, updated, status changed, assigned / reassigned / unassigned, deleted; comment added / deleted; project created, updated, archived, restored; project member added / removed. | M |
+| FR-ACT-01 | The system shall record an activity entry (actor, action, target, changes, timestamp) for: task created, updated, status changed, changes requested (with reason), flagged / unflagged (with reason), assigned / reassigned / unassigned, deleted; comment added / deleted; project created, updated, archived, restored; project member added / removed. | M |
 | FR-ACT-02 | The system shall record activity entries in the same transaction as the change they describe. | M |
 | FR-ACT-03 | The system shall display a task's activity history in the task detail view. | M |
 | FR-ACT-04 | The system shall display a paginated project activity feed. | M |
@@ -168,6 +175,10 @@ Permissions referenced below are defined in Step 2.2 — Roles and Permission Re
 | Task assigned to a user | New assignee |
 | Task reassigned away from or unassigned from a user | Previous assignee |
 | Status of an assigned task changed by someone else | Assignee |
+| Task submitted for review (moved to In Review) | Project's manager |
+| Changes requested on a task (with reason) | Assignee |
+| Task marked Blocked (with reason) | Project's manager |
+| Task unblocked | Assignee |
 | Comment added to a task | Assignee and task creator |
 | User added to a project | Added user |
 | User removed from a project | Removed user |

@@ -95,7 +95,13 @@ Legend: ✅ allowed · ⚪ conditional (see note) · ❌ not allowed
 | View board and tasks | ✅ | Member projects | Member projects |
 | Create task | ✅ | Managed projects | Member projects ⚪ 2 |
 | Edit task details | ✅ | Managed projects | ⚪ 3 |
-| Change task status | ✅ | Managed projects | Tasks assigned to them |
+| Change status: To Do ↔ In Progress → In Review, or withdraw In Review → In Progress | ✅ | Managed projects | Tasks assigned to them ⚪ 5 |
+| Approve: move to Done (from any status) | ✅ | Managed projects | ❌ |
+| Request changes: In Review → In Progress (reason required) | ✅ | Managed projects | ❌ |
+| Reopen: Done → To Do / In Progress | ✅ | Managed projects | ❌ |
+| Mark task Blocked (reason required) | ✅ | Managed projects | Tasks assigned to them |
+| Clear Blocked | ✅ | Managed projects | ❌ |
+| Mark / clear On hold (reason required) | ✅ | Managed projects | Tasks assigned to them |
 | Assign / reassign task to anyone in project | ✅ | Managed projects | ❌ |
 | Self-assign an unassigned task | ✅ | Managed projects | Member projects |
 | Unassign task | ✅ | Managed projects | ❌ |
@@ -118,6 +124,7 @@ Legend: ✅ allowed · ⚪ conditional (see note) · ❌ not allowed
 2. A Team Member may leave the task unassigned or assign it to themselves only.
 3. A Team Member may edit title, description, priority and due date of tasks **assigned to them or created by them**.
 4. A Project Manager may invite with the **Team Member** role only, and may pre-select only projects they manage (R11).
+5. A Team Member cannot change the status of a task while it is flagged Blocked (R16).
 
 ## 6. Business Rules
 
@@ -136,6 +143,9 @@ Legend: ✅ allowed · ⚪ conditional (see note) · ❌ not allowed
 | R11 | An inviter cannot grant more access than they are permitted to: Project Managers may invite only as Team Member and may pre-select only projects they manage; Tenant Admins may invite any role and pre-select any project. |
 | R12 | When a Project Manager is removed or demoted, their pending invitations are automatically revoked. |
 | R13 | On acceptance, the new member is added only to pre-selected projects that still exist and are not archived. |
+| R14 | **Review rule:** Team Members submit work by moving it to In Review. Only the project's manager or a Tenant Admin can move a task to Done, request changes (In Review → In Progress, with a reason) or reopen a Done task. |
+| R15 | A task can have at most one flag (Blocked or On hold), always with a reason. Done tasks cannot be flagged, and moving a task to Done clears its flag. |
+| R16 | Blocked is reported by the assignee (or a manager) and cleared only by the project's manager or a Tenant Admin. While Blocked, the assignee cannot change the task's status. Marking a task Blocked notifies the project's manager. |
 
 ## 7. Error Response Rules
 

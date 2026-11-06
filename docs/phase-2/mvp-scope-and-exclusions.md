@@ -26,6 +26,8 @@ Anything not listed as in scope is excluded from the MVP by default.
 | D8 | File storage | Cloudinary is used **only for user avatars** |
 | D9 | Application Owner data access | The Application Owner manages organizations but **cannot access tenant content** (projects, tasks, comments) |
 | D10 | Team Lead role | Not a separate role in the MVP. Team leads use the Project Manager or Team Member role; a project-level Lead role is a future enhancement |
+| D11 | Blocked / On hold | Modeled as a **flag** on the task, not as extra statuses. Flagged tasks stay in their board column with a badge; a "Blocked tasks" dialog lists them per project |
+| D12 | Review workflow | Members submit work to **In Review**; only Project Managers / Tenant Admins approve to Done, request changes or reopen |
 
 ## 3. In-Scope Modules
 
@@ -68,20 +70,23 @@ Anything not listed as in scope is excluded from the MVP by default.
 - Create, update, archive, restore and delete projects.
 - Assign one Project Manager per project.
 - Add and remove project members.
-- Project summary: task counts by status, overdue tasks and completion percentage.
+- Project summary: task counts by status, overdue and blocked tasks, and completion percentage.
 
 ### 3.7 Task Management
 - Create, view, update and delete tasks.
 - Fixed fields: title, description, status, priority, assignee, due date.
 - Fixed statuses: To Do, In Progress, In Review, Done.
 - Fixed priorities: Low, Medium, High, Urgent.
+- Review workflow: submit for review, approve, request changes (with reason) and reopen.
+- Task flags: Blocked and On hold, each with a required reason.
 - Assignment, self-assignment and reassignment.
 - "My Tasks" view across projects within the active organization.
 
 ### 3.8 Kanban Board
 - One board per project with one column per status.
 - Drag-and-drop status change, with a non-drag alternative.
-- Filter by assignee and priority.
+- Filter by assignee, priority and flag.
+- Blocked and On hold badges on cards; "Blocked tasks" dialog per project.
 
 ### 3.9 Collaboration
 - Task comments: create, edit own, delete own; moderation by managers.
@@ -102,7 +107,8 @@ Anything not listed as in scope is excluded from the MVP by default.
 | Real-time updates (WebSockets) | Infrastructure complexity; polling is sufficient | Yes |
 | Manual card ordering within Kanban columns | Ordering complexity; cards are sorted automatically | Yes |
 | Custom task statuses / workflows | PID excludes complex workflow customization | Yes |
-| Subtasks, task dependencies, labels | Feature quantity over depth | Yes |
+| Subtasks, task dependencies, labels | Feature quantity over depth; blockers are reported manually with the Blocked flag | Yes |
+| Additional statuses (Blocked, On Hold) as board columns | Replaced by task flags (D11) | No |
 | Multiple assignees per task | Weakens clear ownership (Problem P2) | No |
 | @mentions in comments | Notification complexity | Yes |
 | Email notifications for task events | In-app notifications cover MVP needs | Yes |

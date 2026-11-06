@@ -105,7 +105,7 @@ Targets under normal load on the selected free/low-cost hosting, excluding cold 
 |---|---|
 | NFR-TEST-01 | Backend services and business rules shall have unit tests. |
 | NFR-TEST-02 | API endpoints shall have integration tests against a real MongoDB replica set (e.g. in-memory replica set). |
-| NFR-TEST-03 | Every permission matrix entry and business rule (R1–R13) shall have an authorization test. |
+| NFR-TEST-03 | Every permission matrix entry and business rule (R1–R16) shall have an authorization test. |
 | NFR-TEST-04 | The cross-tenant test suite (NFR-ISO-07) shall pass before every deployment. |
 | NFR-TEST-05 | Backend line coverage shall be at least 70%, and 90% for authorization and tenancy modules. |
 | NFR-TEST-06 | Journeys J1, J3 and J5 shall have automated end-to-end tests. |
@@ -118,7 +118,7 @@ Targets under normal load on the selected free/low-cost hosting, excluding cold 
 | NFR-OPS-01 | The application shall be deployed to a publicly accessible environment using free or low-cost hosting. |
 | NFR-OPS-02 | Configuration shall be environment-based (development, test, production). |
 | NFR-OPS-03 | The backend shall produce structured logs with request IDs; passwords, tokens and secrets shall never be logged. |
-| NFR-OPS-04 | Database backups shall rely on the managed database provider's backup capability. |
+| NFR-OPS-04 | Production database backups shall be taken with a manual backup script (mongodump) before risky deployments, as the free database tier provides no automated backups. |
 | NFR-OPS-05 | A seed script shall create the Application Owner and optional demo data. |
 
 ## 11. Privacy (PRIV)

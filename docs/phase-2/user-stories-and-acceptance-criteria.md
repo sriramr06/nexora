@@ -21,7 +21,7 @@ Describe the MVP from the users' perspective. Each story references its function
 | E3 | Platform Administration | US-09 – US-11 |
 | E4 | Invitations and Membership | US-12 – US-16, US-34 – US-35 |
 | E5 | Projects | US-17 – US-20 |
-| E6 | Tasks and Kanban | US-21 – US-27 |
+| E6 | Tasks and Kanban | US-21 – US-27, US-36 – US-38 |
 | E7 | Collaboration | US-28 – US-29 |
 | E8 | Notifications and Profile | US-30 – US-32 |
 | E9 | Tenant Isolation (cross-cutting) | US-33 |
@@ -202,7 +202,7 @@ As a *Project Manager*, I want to add and remove project members, so that the ri
 As a *Project Manager*, I want a project summary, so that I can spot delays.  
 **Refs:** FR-PROJ-08, FR-TASK-10
 
-- Given tasks in several statuses, when I open the summary, then I see counts per status, the overdue count and the completion percentage (Done / total).
+- Given tasks in several statuses, when I open the summary, then I see counts per status, the overdue count, the blocked count and the completion percentage (Done / total).
 
 ### US-20 Archive or delete a project
 As a *Tenant Admin*, I want to archive or delete projects, so that the workspace stays relevant.  
@@ -246,9 +246,11 @@ As a *task assignee or creator*, I want to edit task details, so that informatio
 
 ### US-25 Move tasks on the board
 As an *assignee*, I want to drag my task to another column, so that my team sees its status.  
-**Refs:** FR-BOARD-01 – 05, FR-TASK-03
+**Refs:** FR-BOARD-01 – 05, FR-TASK-03, FR-TASK-12
 
 - Given I am assigned to a task, when I drag it to In Progress, then its status updates and activity is recorded.
+- Given I am assigned to a task in progress, when I drag it to In Review, then it is submitted for review and the project's manager is notified.
+- Given I am a Team Member, when I drag my task to Done, then it returns to its column with the message "Submit for review instead".
 - Given I am a Team Member not assigned to the task, when I try to move it, then it returns to its original column with an error.
 - Given I cannot use drag-and-drop, when I change status from the task menu, then the result is the same.
 
@@ -265,6 +267,35 @@ As a *member*, I want one list of my assigned tasks, so that I know my responsib
 
 - Given tasks assigned to me in several projects, when I open My Tasks, then I see them all for the active organization, sortable by due date.
 - Given a task in another organization, then it does not appear.
+
+### US-36 Review submitted work
+As a *Project Manager*, I want to approve or send back work submitted for review, so that Done means accepted.  
+**Refs:** FR-TASK-13, R14
+
+- Given a task In Review in my managed project, when I move it to Done, then it is complete and the assignee is notified.
+- Given a task In Review, when I request changes with a reason, then it returns to In Progress, the reason is recorded in activity and the assignee is notified with the reason.
+- Given I request changes without a reason, then the request is rejected.
+- Given a Done task, when I reopen it, then it returns to To Do or In Progress; when a Team Member tries to reopen it, then they receive 403.
+- Given the work should go to someone else, when I reassign the task, then the new assignee is notified (US-22).
+
+### US-37 Report a blocker or put a task on hold
+As an *assignee*, I want to flag my task as Blocked or On hold with a reason, so that my manager knows why it is not progressing.  
+**Refs:** FR-TASK-14 – 16, FR-BOARD-07, FR-BOARD-08, R15, R16
+
+- Given my task is not Done, when I mark it Blocked with a reason, then the card stays in its column with a Blocked badge and the project's manager is notified.
+- Given I try to flag a task without a reason, then the request is rejected.
+- Given my task is Blocked, when I try to change its status or clear the flag, then I receive 403.
+- Given my task is On hold, when I clear the flag, then the badge is removed and the task stays in its column.
+- Given a Done task, when anyone tries to flag it, then the request is rejected.
+
+### US-38 Resolve blocked tasks
+As a *Project Manager*, I want to see all blocked tasks in one place and unblock them, so that blockers are resolved quickly.  
+**Refs:** FR-BOARD-09, FR-PROJ-08, FR-TASK-15
+
+- Given my project has 3 blocked tasks, when I open the board, then the "Blocked tasks" control shows 3 and opens a list with each reason, assignee, who flagged it and since when.
+- Given a blocked task, when I clear the flag, then it is removed, activity is recorded and the assignee is notified.
+- Given a flagged task, when it is moved to Done, then its flag is cleared automatically.
+- Given the project summary, then it shows the blocked task count.
 
 ## 9. E7 — Collaboration
 
