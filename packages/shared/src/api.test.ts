@@ -1,17 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { healthResponseSchema } from "./api";
 
+const timestamp = new Date().toISOString();
+
 describe("healthResponseSchema", () => {
-  it("accepts a valid health response", () => {
+  it("accepts a healthy response", () => {
     const result = healthResponseSchema.safeParse({
-      data: { status: "ok", timestamp: new Date().toISOString() },
+      data: { status: "ok", database: "up", timestamp },
     });
     expect(result.success).toBe(true);
   });
 
-  it("rejects an invalid status", () => {
+  it("accepts a degraded response", () => {
     const result = healthResponseSchema.safeParse({
-      data: { status: "down", timestamp: new Date().toISOString() },
+      data: { status: "degraded", database: "down", timestamp },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects an unknown status", () => {
+    const result = healthResponseSchema.safeParse({
+      data: { status: "broken", database: "up", timestamp },
     });
     expect(result.success).toBe(false);
   });

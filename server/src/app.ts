@@ -5,6 +5,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { notFound } from "./common/middleware/not-found";
 import { errorHandler } from "./common/middleware/error-handler";
+import { isDbConnected } from "./common/db/connection";
 
 // Creates the Express application without starting a server,
 // so tests can use it directly with Supertest.
@@ -18,10 +19,15 @@ export function createApp() {
   app.use(cookieParser());
 
   app.get(`${API_PREFIX}/health`, (_req, res) => {
+    const databaseUp = isDbConnected();
     const body: HealthResponse = {
-      data: { status: "ok", timestamp: new Date().toISOString() },
+      data: {
+        status: databaseUp ? "ok" : "degraded",
+        database: databaseUp ? "up" : "down",
+        timestamp: new Date().toISOString(),
+      },
     };
-    res.json(body);
+    res.status(databaseUp ? 200 : 503).json(body);
   });
 
   app.use(notFound);

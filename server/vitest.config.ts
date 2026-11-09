@@ -3,6 +3,8 @@ import { defineConfig } from "vitest/config";
 // Test-only environment values (no real secrets).
 export default defineConfig({
   test: {
+    // Starting the in-memory MongoDB (and downloading it on first run) can be slow.
+    hookTimeout: 120_000,
     env: {
       NODE_ENV: "test",
       APP_URL: "http://localhost:5173",
