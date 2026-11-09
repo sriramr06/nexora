@@ -1,7 +1,9 @@
 import { createApp } from "./app";
+import { logger } from "./common/logger";
+import { env } from "./config/env";
 
-const port = Number(process.env.PORT ?? 4000);
+const port = env.PORT; // already a number (z.coerce)
 
 createApp().listen(port, () => {
-  console.log(`Nexora API listening on http://localhost:${port}`);
+  logger.info(`Nexora API listening on http://localhost:${port}`);
 });
