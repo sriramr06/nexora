@@ -33,7 +33,7 @@ GitHub (main) ──► GitHub Actions: lint → typecheck → test → build
                      ┌─────────────┴─────────────┐
                      ▼                           ▼
               Vercel (client)              Render (server)
-              nexora.vercel.app            nexora-api.onrender.com
+              nexora-six-rouge.vercel.app            nexora-5crt.onrender.com
               /api/* ── rewrite ─────────► /api/*
                                                  │
                               MongoDB Atlas (prod) · Cloudinary · Brevo SMTP
@@ -61,7 +61,7 @@ GitHub (main) ──► GitHub Actions: lint → typecheck → test → build
 ```json
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://nexora-api.onrender.com/api/:path*" },
+    { "source": "/api/:path*", "destination": "https://nexora-5crt.onrender.com/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
