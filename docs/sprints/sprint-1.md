@@ -8,7 +8,8 @@
 - [x] Monorepo (`client`, `server`, `packages/shared`), TypeScript strict, ESLint, Prettier, Vitest
 - [x] GitHub Actions CI (lint, format, typecheck, test, build)
 - [x] Walking skeleton runs locally (client → Vite proxy → API health)
-- [ ] First pull request merged; `main` protected (PR + CI required)
+- [x] First pull request merged
+- [x] `main` protected by ruleset (PR + CI required)
 
 ## Learning
 
@@ -35,10 +36,10 @@
 
 ## Deployment
 
-- [ ] Accounts: MongoDB Atlas (dev + prod), Render, Vercel, Brevo, Cloudinary
-- [ ] API deployed on Render (Singapore) connected to Atlas prod
-- [ ] Client deployed on Vercel with `/api` rewrite; "API connected" in production
-- [ ] Deploy-after-CI job in GitHub Actions; auto-deploy disabled
+- [x] Accounts: MongoDB Atlas (dev + prod), Render, Vercel (Brevo, Cloudinary: when needed)
+- [x] API deployed on Render (Singapore) connected to Atlas prod
+- [x] Client deployed on Vercel with `/api` rewrite; "API connected" in production
+- [x] Deploy-after-CI job in GitHub Actions; auto-deploy disabled
 
 ## Authentication Stories
 

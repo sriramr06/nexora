@@ -2,8 +2,10 @@ import mongoose from "mongoose";
 import { logger } from "../common/logger";
 import { runScript } from "./run-script";
 
-// Models must be imported here so Mongoose knows about them, e.g.:
-// import "../modules/users/user.model";
+// Every model must be imported here so Mongoose knows about it.
+import "../modules/users/user.model";
+import "../modules/auth/refresh-token.model";
+import "../modules/auth/user-token.model";
 
 // Creates missing indexes and drops indexes no longer defined in the schemas (DEP-9).
 // Runs in the deploy pipeline because autoIndex is disabled in production.
