@@ -19,12 +19,13 @@
 
 ## Backend Foundations
 
-- [ ] Environment config validated with Zod
-- [ ] Request ID, security headers (Helmet), pino logging
-- [ ] Central error handler and standard error format (API design §3–4)
-- [ ] MongoDB connection, `withTransaction` helper
-- [ ] Tenant-scoped repository base
-- [ ] `db:sync-indexes` and `db:seed` script skeletons
+- [x] Environment config validated with Zod
+- [x] Request ID, security headers (Helmet), pino logging
+- [x] Central error handler and standard error format (API design §3–4)
+- [x] Request validation middleware (Zod)
+- [x] MongoDB connection, graceful shutdown, `withTransaction` helper
+- [ ] ~~Tenant-scoped repository base~~ → moved to Sprint 2 (built with the tenancy pipeline)
+- [x] `db:sync-indexes` and `db:seed` script skeletons
 
 ## Client Foundations
 
