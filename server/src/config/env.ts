@@ -6,7 +6,8 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 
   // Frontend base URL, used in email links (verification, reset, invitations).
-  APP_URL: z.url(),
+  // Trailing slashes are removed so links never contain "//".
+  APP_URL: z.url().transform((url) => url.replace(/\/+$/, "")),
 
   MONGODB_URI: z
     .string()

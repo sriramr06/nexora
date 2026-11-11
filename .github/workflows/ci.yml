@@ -6,10 +6,10 @@ on:
   pull_request:
     branches: [main]
 
-# Cancel an older run on the same branch when a new commit is pushed.
+# Cancel older runs on the same pull request; never cancel a run on main (it may be deploying).
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   checks:
@@ -41,5 +41,45 @@ jobs:
       - name: Build
         run: npm run build
 
-  # Deploy job (Render deploy hook + Vercel CLI, main only) is added
-  # once the hosting accounts are set up — see docs/phase-3/deployment-and-ci.md.
+  # Runs only for pushes to main, and only if every check above passed (DEP-6).
+  deploy:
+    name: Deploy to production
+    needs: checks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Production has autoIndex disabled; indexes are synced explicitly (DEP-9).
+      - name: Sync database indexes
+        run: npm run db:sync-indexes
+        env:
+          NODE_ENV: production
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          APP_URL: https://nexora-six-rouge.vercel.app
+          # Not used by the script, but required by env validation.
+          JWT_ACCESS_SECRET: ci-placeholder-secret-not-used-for-signing
+
+      - name: Deploy API (Render)
+        run: curl --fail --silent --show-error -X POST "$RENDER_DEPLOY_HOOK_URL"
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+
+      - name: Deploy client (Vercel)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npx --yes vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
+          npx --yes vercel@latest build --prod --token="$VERCEL_TOKEN"
+          npx --yes vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
