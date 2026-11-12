@@ -9,6 +9,7 @@ const matrix: [Action, OrgRole[]][] = [
   ["org.view", ["admin", "project_manager", "member"]],
   ["org.update", ["admin"]],
   ["member.view", ["admin", "project_manager", "member"]],
+  ["invitation.view", ["admin", "project_manager"]],
   ["invitation.viewAll", ["admin"]],
   ["member.changeRole", ["admin"]],
   ["member.remove", ["admin"]],

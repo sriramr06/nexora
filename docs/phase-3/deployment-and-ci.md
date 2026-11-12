@@ -37,7 +37,7 @@ GitHub (main) ──► GitHub Actions: lint → typecheck → test → build
               nexora-six-rouge.vercel.app            nexora-5crt.onrender.com
               /api/* ── rewrite ─────────► /api/*
                                                  │
-                              MongoDB Atlas (prod) · Cloudinary · Gmail API
+                              MongoDB Atlas (prod) · Gmail API
 ```
 
 ## 4. Environments
@@ -48,7 +48,6 @@ GitHub (main) ──► GitHub Actions: lint → typecheck → test → build
 | API | `npm run dev` | In-process (Supertest) | Render web service |
 | Database | Atlas dev cluster | mongodb-memory-server replica set | Atlas prod cluster |
 | Email | `ConsoleEmailService` | `FakeEmailService` | `GmailApiEmailService` (HTTPS) |
-| Cloudinary folder | `nexora/development` | Mocked | `nexora/production` |
 
 **Database tools:** MongoDB Compass may be used to inspect the dev cluster. Data is changed only through the application or seed scripts, never edited manually, to avoid bypassing business rules, activity and notifications. Production access through Compass uses a **read-only** database user.
 

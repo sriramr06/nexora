@@ -6,6 +6,9 @@ import { RegisterPage } from "@/features/auth/pages/register-page";
 import { ResetPasswordPage } from "@/features/auth/pages/reset-password-page";
 import { VerifyEmailPage } from "@/features/auth/pages/verify-email-page";
 import { LandingPage } from "@/features/landing/landing-page";
+import { AcceptInvitationPage } from "@/features/members/pages/accept-invitation-page";
+import { InvitationsPage } from "@/features/members/pages/invitations-page";
+import { MembersPage } from "@/features/members/pages/members-page";
 import { OrgGate } from "@/features/organizations/org-gate";
 import { NewOrganizationPage } from "@/features/organizations/pages/new-organization-page";
 import { OrgHomePage } from "@/features/organizations/pages/org-home-page";
@@ -55,6 +58,7 @@ export const router = createBrowserRouter([
     children: [
       { path: "/verify-email", element: <VerifyEmailPage /> },
       { path: "/reset-password", element: <ResetPasswordPage /> },
+      { path: "/invite", element: <AcceptInvitationPage /> },
     ],
   },
   {
@@ -77,6 +81,8 @@ export const router = createBrowserRouter([
                 element: <OrgGate />,
                 children: [
                   { index: true, element: <OrgHomePage /> },
+                  { path: "members", element: <MembersPage /> },
+                  { path: "invitations", element: <InvitationsPage /> },
                   { path: "settings", element: <OrgSettingsPage /> },
                 ],
               },

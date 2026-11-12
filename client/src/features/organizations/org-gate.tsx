@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, Outlet, useOutletContext, useParams } from "react-router";
+import { Link, NavLink, Outlet, useOutletContext, useParams } from "react-router";
 import { can, type Action, type Organization, type OrgRole } from "@nexora/shared";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -70,5 +70,41 @@ export function OrgGate() {
         action,
       ),
   };
-  return <Outlet context={context} />;
+  return (
+    <div className="grid gap-6">
+      <OrgNav orgId={organization.id} allows={context.allows} />
+      <Outlet context={context} />
+    </div>
+  );
+}
+
+const tabClass = ({ isActive }: { isActive: boolean }) =>
+  isActive
+    ? "border-b-2 border-primary pb-2 text-foreground"
+    : "border-b-2 border-transparent pb-2 text-muted-foreground hover:text-foreground";
+
+// Tabs shown to each role (Roles §5.1); the API enforces the same rules.
+function OrgNav({ orgId, allows }: { orgId: string; allows: OrgContext["allows"] }) {
+  const tabs = [
+    { to: `/o/${orgId}`, label: "Overview", end: true, show: true },
+    { to: `/o/${orgId}/members`, label: "Members", end: false, show: allows("member.view") },
+    {
+      to: `/o/${orgId}/invitations`,
+      label: "Invitations",
+      end: false,
+      show: allows("invitation.view"),
+    },
+    { to: `/o/${orgId}/settings`, label: "Settings", end: false, show: allows("org.update") },
+  ];
+  return (
+    <nav aria-label="Organization" className="-mb-2 flex gap-5 overflow-x-auto border-b text-sm">
+      {tabs
+        .filter((t) => t.show)
+        .map((t) => (
+          <NavLink key={t.to} to={t.to} end={t.end} className={tabClass}>
+            {t.label}
+          </NavLink>
+        ))}
+    </nav>
+  );
 }

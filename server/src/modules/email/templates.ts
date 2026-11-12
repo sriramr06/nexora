@@ -152,3 +152,28 @@ export const organizationReactivatedEmail = (
       <p><strong>${escapeHtml(orgName)}</strong> has been reactivated. Your team has access again.</p>
       ${button(link, "Open Nexora")}`),
 });
+
+// ---------- invitations (FR-INV-03) ----------
+
+export const invitationEmail = (
+  orgName: string,
+  inviterName: string,
+  roleLabel: string,
+  link: string,
+): EmailContent => ({
+  subject: `${inviterName} invited you to ${orgName} on Nexora`,
+  text: [
+    "Hi,",
+    "",
+    `${inviterName} invited you to join ${orgName} on Nexora as ${roleLabel}.`,
+    "Accept the invitation:",
+    link,
+    "",
+    "This link expires in 7 days.",
+  ].join("\n"),
+  html: layout(`
+      <p>Hi,</p>
+      <p><strong>${escapeHtml(inviterName)}</strong> invited you to join <strong>${escapeHtml(orgName)}</strong> on Nexora as ${escapeHtml(roleLabel)}.</p>
+      ${button(link, "Accept invitation")}
+      <p>This link expires in 7 days.</p>`),
+});

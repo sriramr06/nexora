@@ -15,6 +15,7 @@ import {
 import { applyServerErrors } from "@/lib/form-errors";
 import { useCurrentUser } from "@/lib/auth-store";
 import { useChangePassword } from "@/features/auth/auth-api";
+import { ProfileCard } from "./profile-card";
 import {
   Field,
   FormError,
@@ -57,6 +58,7 @@ export function AccountPage() {
           {user.name} · {user.email}
         </p>
       </div>
+      <ProfileCard />
       <Card className="max-w-md">
         <CardHeader>
           <CardTitle>Change password</CardTitle>

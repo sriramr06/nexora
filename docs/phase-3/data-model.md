@@ -27,7 +27,7 @@ Define the MongoDB collections, fields, constraints and indexes for Nexora, trac
 
 | Group | Collections |
 |---|---|
-| Global | `users`, `organizations`, `refreshTokens`, `userTokens` |
+| Global | `users`, `organizations`, `refreshTokens`, `userTokens`, `avatars` |
 | Tenant-owned (carry `organizationId`) | `memberships`, `invitations`, `projects`, `tasks`, `comments`, `activities`, `notifications` |
 
 ## 4. Collections
@@ -41,7 +41,7 @@ Define the MongoDB collections, fields, constraints and indexes for Nexora, trac
 | `email` | String | Yes | Unique; stored lowercase and trimmed |
 | `passwordHash` | String | Yes | Never returned by the API |
 | `emailVerified` | Boolean | Yes | Default `false`; set `true` on verification or registration through an invitation |
-| `avatar` | Object | No | `{ url: String, publicId: String }` — `publicId` is the Cloudinary ID used to delete replaced images |
+| `avatar` | Object | No | `{ url: String, publicId: String }` — `publicId` is the image version in the `avatars` collection; it changes on every upload so cached images refresh |
 | `platformRole` | Enum | No | `"owner"` or absent; set only by the seed script |
 | `passwordChangedAt` | Date | No | Tokens issued before this time are rejected |
 | `lastLoginAt` | Date | No | Updated on successful login; shown on the Application Owner dashboard |
@@ -266,3 +266,17 @@ Define the MongoDB collections, fields, constraints and indexes for Nexora, trac
 **Indexes:** unique `{ tokenHash: 1 }`; `{ userId: 1, type: 1 }`; TTL `{ expiresAt: 1 }` with `expireAfterSeconds: 0`.
 
 **Rule:** issuing a new token invalidates the user's previous unused tokens of the same type, so only the latest link works.
+
+### 4.12 `avatars` — Added 12 Nov 2026
+
+| Field | Type | Required | Rules / Notes |
+|---|---|---|---|
+| `_id` | ObjectId | Yes | Auto-generated |
+| `userId` | ObjectId → users | Yes | Unique — one avatar per user |
+| `version` | String | Yes | Random ID; equals `users.avatar.publicId` and is part of the image URL |
+| `contentType` | String | Yes | Always `image/webp` |
+| `data` | Binary | Yes | 256 × 256 WebP (typically 10–30 KB; far below MongoDB's 16 MB document limit) |
+| `updatedAt` | Date | Yes | |
+
+**Indexes:** unique `{ userId: 1 }`.
+

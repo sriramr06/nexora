@@ -49,19 +49,3 @@ export const createOrganizationRouter = (): Router => {
 
   return router;
 };
-
-// /api/v1/me (API design §8.2) — the parts needed so far.
-export const createMeRouter = (): Router => {
-  const router = Router();
-  router.use(authenticate);
-
-  router.get("/", (req, res) => {
-    sendData(res, { user: currentUser(req) });
-  });
-
-  router.get("/organizations", async (req, res) => {
-    sendData(res, await orgs.listMyOrganizations(currentUser(req)._id));
-  });
-
-  return router;
-};

@@ -16,6 +16,7 @@ export interface PermissionContext {
   "member.view": undefined;
   // R11: Project Managers invite Team Members only, to projects they manage.
   "invitation.create": { role: OrgRole; projectIds: string[]; managedProjectIds: string[] };
+  "invitation.view": undefined; // the invitations page: admins (all) and PMs (own)
   "invitation.viewAll": undefined;
   "invitation.manage": { invitedBy: string };
   "member.changeRole": undefined; // last-admin rule (R1) is checked in the transaction
@@ -40,6 +41,7 @@ const rules: { [A in Action]: Rule<A> } = {
     if (actor.role !== "project_manager") return false;
     return role === "member" && projectIds.every((id) => managedProjectIds.includes(id));
   },
+  "invitation.view": (actor) => actor.role === "admin" || actor.role === "project_manager",
   "invitation.viewAll": isAdmin,
   "invitation.manage": (actor, { invitedBy }) =>
     isAdmin(actor) || (actor.role === "project_manager" && invitedBy === actor.userId),

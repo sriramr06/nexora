@@ -77,9 +77,9 @@ Sprint 1 finished three days early, and the product must be demo-ready for inter
 
 **Goal:** teams can be built and managed.
 
-- Invitations: single, bulk, Project Manager limits (R11), project pre-selection (R13), resend cooldown, revoke, lookup, register, accept.
+- Invitations: single, bulk, Project Manager limits (R11), resend cooldown, revoke, lookup, register, accept. (Project pre-selection moved to Sprint 4 — it needs projects, and features ship backend + frontend together.)
 - Members: list, change role, remove, leave; last-admin rule with `adminsVersion` (R1); R12.
-- Profile: name; avatar upload with byte-level validation and Cloudinary transformation.
+- Profile: name; avatar upload with byte-level validation, resized and stored in MongoDB.
 
 **Stories:** US-12 – US-16, US-31, US-32, US-34, US-35.
 
@@ -88,6 +88,7 @@ Sprint 1 finished three days early, and the product must be demo-ready for inter
 **Goal:** projects and tasks work end to end with history.
 
 - Projects: create, update, manager, members, archive / restore, delete with cascade; accessible project list.
+- Invitation project pre-selection (R11, R13): API field + picker + add to projects on acceptance (moved from Sprint 3).
 - Tasks: create, view, edit, delete, assignment rules (R4, Team Member self-assignment), optimistic concurrency (`version`).
 - Activity recording service (transactional) and task history.
 - My Tasks.

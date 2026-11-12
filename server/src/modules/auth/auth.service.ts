@@ -73,7 +73,11 @@ const sendVerificationEmail = async (user: AuthUser) => {
 
 // ---------- sessions ----------
 
-const createSession = async (user: AuthUser, session?: ClientSession): Promise<AuthSession> => ({
+// Also used by invitation registration (FR-INV-06), which logs the new member in.
+export const createSession = async (
+  user: AuthUser,
+  session?: ClientSession,
+): Promise<AuthSession> => ({
   accessToken: signAccessToken(user.id),
   refresh: await startFamily(user._id, session),
   user,
