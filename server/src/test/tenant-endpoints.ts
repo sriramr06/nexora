@@ -88,4 +88,32 @@ export const TENANT_ENDPOINTS: TenantEndpoint[] = [
   },
   { method: "delete", path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}` },
   { method: "get", path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}/activity` },
+  // Sprint 5: board, workflow, comments
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}/board` },
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}/summary` },
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}/blocked-tasks` },
+  {
+    method: "post",
+    path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}/status`,
+    body: { status: "done", version: 0 },
+  },
+  {
+    method: "post",
+    path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}/request-changes`,
+    body: { reason: "x", version: 0 },
+  },
+  {
+    method: "put",
+    path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}/flag`,
+    body: { type: "blocked", reason: "x", version: 0 },
+  },
+  { method: "delete", path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}/flag`, body: { version: 0 } },
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}/comments` },
+  {
+    method: "post",
+    path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}/comments`,
+    body: { body: "x" },
+  },
+  { method: "patch", path: (o) => `/api/v1/orgs/${o}/comments/${ANY_ID}`, body: { body: "x" } },
+  { method: "delete", path: (o) => `/api/v1/orgs/${o}/comments/${ANY_ID}` },
 ];
