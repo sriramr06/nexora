@@ -27,6 +27,12 @@ export class ConsoleEmailService implements EmailService {
   }
 }
 
+export const SMTP_TIMEOUTS = {
+  connectionTimeout: 10_000, // TCP connect
+  greetingTimeout: 10_000, // server greeting after connect
+  socketTimeout: 20_000, // inactivity during the session
+} as const;
+
 export class SmtpEmailService implements EmailService {
   private transporter: Transporter;
 
@@ -39,6 +45,9 @@ export class SmtpEmailService implements EmailService {
         user: env.SMTP_USER,
         pass: env.SMTP_PASS,
       },
+      // Fail fast: nodemailer's defaults wait up to minutes (socket: 10 min) when the
+      // SMTP port is unreachable, which left registration spinning in production.
+      ...SMTP_TIMEOUTS,
     });
   }
 
