@@ -1,4 +1,5 @@
-import { useForm } from "react-hook-form";
+import { LockIcon } from "lucide-react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -14,7 +15,12 @@ import {
 import { applyServerErrors } from "@/lib/form-errors";
 import { useCurrentUser } from "@/lib/auth-store";
 import { useChangePassword } from "@/features/auth/auth-api";
-import { Field, FormError, SubmitButton } from "@/features/auth/components/form-parts";
+import {
+  Field,
+  FormError,
+  PasswordRules,
+  SubmitButton,
+} from "@/features/auth/components/form-parts";
 
 const formSchema = changePasswordSchema
   .extend({ confirmPassword: z.string() })
@@ -31,6 +37,7 @@ export function AccountPage() {
   const changePassword = useChangePassword();
   const form = useForm({ resolver: zodResolver(formSchema), defaultValues: emptyForm });
   const { errors, isSubmitting } = form.formState;
+  const newPasswordValue = useWatch({ control: form.control, name: "newPassword" });
 
   const onSubmit = form.handleSubmit(async ({ currentPassword, newPassword }) => {
     try {
@@ -59,6 +66,7 @@ export function AccountPage() {
           <CardContent className="grid gap-4">
             <Field
               label="Current password"
+              icon={LockIcon}
               type="password"
               autoComplete="current-password"
               error={errors.currentPassword?.message}
@@ -66,14 +74,16 @@ export function AccountPage() {
             />
             <Field
               label="New password"
+              icon={LockIcon}
               type="password"
               autoComplete="new-password"
               error={errors.newPassword?.message}
-              hint="At least 8 characters, including a letter and a number."
+              hint={<PasswordRules value={newPasswordValue ?? ""} />}
               {...form.register("newPassword")}
             />
             <Field
               label="Confirm new password"
+              icon={LockIcon}
               type="password"
               autoComplete="new-password"
               error={errors.confirmPassword?.message}

@@ -31,7 +31,7 @@ const layout = (body: string): string => `<!doctype html>
 </html>`;
 
 const button = (link: string, label: string): string =>
-  `<p><a href="${escapeHtml(link)}" style="display: inline-block; padding: 10px 16px; background: #4f46e5; color: #ffffff; text-decoration: none; border-radius: 6px;">${label}</a></p>
+  `<p><a href="${escapeHtml(link)}" style="display: inline-block; padding: 10px 16px; background: #0f6b62; color: #ffffff; text-decoration: none; border-radius: 6px;">${label}</a></p>
 <p style="font-size: 12px; color: #6b7280;">Or paste this link into your browser:<br>${escapeHtml(link)}</p>`;
 
 export const verificationEmail = (name: string, link: string): EmailContent => ({

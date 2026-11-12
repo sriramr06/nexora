@@ -1,8 +1,15 @@
 import { Link } from "react-router";
 
 // Flat mark + wordmark (UI-1: solid indigo, no gradient). Same mark as public/favicon.svg.
-// `compact`: mark only on small screens, so app headers fit at 360 px.
-export function Logo({ to = "/", compact = false }: { to?: string; compact?: boolean }) {
+interface LogoProps {
+  to?: string;
+  // Mark only on small screens, so app headers fit at 360 px.
+  compact?: boolean;
+  // Inverted mark for the solid brand panel.
+  onBrand?: boolean;
+}
+
+export function Logo({ to = "/", compact = false, onBrand = false }: LogoProps) {
   return (
     <Link
       to={to}
@@ -11,7 +18,11 @@ export function Logo({ to = "/", compact = false }: { to?: string; compact?: boo
     >
       <span
         aria-hidden
-        className="flex size-7 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground"
+        className={
+          onBrand
+            ? "flex size-7 items-center justify-center rounded-md bg-brand-foreground text-sm font-bold text-brand"
+            : "flex size-7 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground"
+        }
       >
         N
       </span>

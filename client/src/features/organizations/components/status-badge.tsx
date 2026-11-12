@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 // Flat dot + label (UI-7). Colour is never the only signal: the label is always shown.
 const dot: Record<OrgStatus, string> = {
   pending_approval: "bg-chart-3",
-  active: "bg-chart-2",
+  active: "bg-primary",
   rejected: "bg-destructive",
   suspended: "bg-muted-foreground",
 };

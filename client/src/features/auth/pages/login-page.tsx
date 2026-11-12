@@ -1,3 +1,4 @@
+import { LockIcon, MailIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useLocation, useNavigate } from "react-router";
@@ -43,6 +44,7 @@ export function LoginPage() {
         <CardContent className="grid gap-4">
           <Field
             label="Email"
+            icon={MailIcon}
             type="email"
             autoComplete="email"
             error={errors.email?.message}
@@ -50,6 +52,7 @@ export function LoginPage() {
           />
           <Field
             label="Password"
+            icon={LockIcon}
             type="password"
             autoComplete="current-password"
             error={errors.password?.message}
