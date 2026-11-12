@@ -14,7 +14,7 @@ Define how Nexora integrates with external services (email, Cloudinary) and how 
 
 | ID | Decision |
 |---|---|
-| INT-1 | Email is sent with **Nodemailer over SMTP**. Production uses **Brevo SMTP** with a verified sender address; the provider can be changed through environment variables only. |
+| INT-1 | Email is sent with **Nodemailer over SMTP**. Production uses **Gmail SMTP** (`smtp.gmail.com:465`, Google App Password; the sender is the same Gmail address; ~500 emails/day). The provider can be changed through environment variables only. Changed from Brevo on 12 Nov 2026 (Brevo signup required business details). |
 | INT-2 | An `EmailService` interface has three implementations: `SmtpEmailService` (production), `ConsoleEmailService` (development — prints emails and links), `FakeEmailService` (tests — records sent emails for assertions). |
 | INT-3 | Emails are sent **after** the database transaction commits, never inside it. No background queue. |
 | INT-4 | Avatars are uploaded **through the API** to Cloudinary, with size and byte-level type validation and a 256 × 256 WebP transformation. |
@@ -101,7 +101,7 @@ Post-commit events decouple code but can lose activity or notifications if a lis
 |---|---|
 | `APP_URL` | Frontend base URL used in email links |
 | `EMAIL_TRANSPORT` | `smtp` / `console` |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | SMTP credentials (Brevo) |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | SMTP credentials (Gmail: host `smtp.gmail.com`, port `465`, App Password) |
 | `EMAIL_FROM` | Verified sender, e.g. `Nexora <sender@example.com>` |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Cloudinary credentials |
 | `CLOUDINARY_FOLDER` | Environment folder, e.g. `nexora/production` |
