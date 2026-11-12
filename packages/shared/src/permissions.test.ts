@@ -97,3 +97,66 @@ describe("can() — invitation.manage", () => {
     expect(can(actor("member", "m"), "invitation.manage", { invitedBy: "m" })).toBe(false);
   });
 });
+
+describe("can() — projects and tasks (Roles §5.2, §5.3)", () => {
+  const pm = actor("project_manager", "pm");
+  const other = actor("project_manager", "pm2");
+  const tm = actor("member", "tm");
+  const admin = actor("admin", "ad");
+  const project = { managerId: "pm", memberIds: ["pm", "pm2", "tm"] };
+  const task = (assigneeId: string | null, createdBy = "pm") => ({
+    ...project,
+    assigneeId,
+    createdBy,
+  });
+
+  it("lets admins and PMs create projects, never Team Members", () => {
+    expect(can(admin, "project.create")).toBe(true);
+    expect(can(pm, "project.create")).toBe(true);
+    expect(can(tm, "project.create")).toBe(false);
+  });
+
+  it("restricts project management to admins and the project's manager", () => {
+    for (const action of ["project.update", "project.manageMembers"] as const) {
+      expect(can(admin, action, project)).toBe(true);
+      expect(can(pm, action, project)).toBe(true);
+      expect(can(other, action, project)).toBe(false); // PM, but only a member here
+      expect(can(tm, action, project)).toBe(false);
+    }
+    expect(can(pm, "project.setManager")).toBe(false);
+    expect(can(pm, "project.delete")).toBe(false);
+  });
+
+  it("shows projects to admins and members only", () => {
+    expect(can(actor("member", "outsider"), "project.view", project)).toBe(false);
+    expect(can(tm, "project.view", project)).toBe(true);
+    expect(can(actor("admin", "x"), "project.view", project)).toBe(true);
+  });
+
+  it("lets members create tasks; outsiders cannot", () => {
+    expect(can(tm, "task.create", project)).toBe(true);
+    expect(can(actor("member", "outsider"), "task.create", project)).toBe(false);
+  });
+
+  it("lets Team Members edit only tasks assigned to or created by them (note 3)", () => {
+    expect(can(tm, "task.edit", task("tm"))).toBe(true);
+    expect(can(tm, "task.edit", task(null, "tm"))).toBe(true);
+    expect(can(tm, "task.edit", task("pm2"))).toBe(false);
+    expect(can(pm, "task.edit", task("pm2"))).toBe(true); // manager
+  });
+
+  it("lets Team Members only self-assign an unassigned task (FR-TASK-06, 07)", () => {
+    expect(can(tm, "task.assign", { ...task(null), newAssigneeId: "tm" })).toBe(true);
+    expect(can(tm, "task.assign", { ...task(null), newAssigneeId: "pm2" })).toBe(false);
+    expect(can(tm, "task.assign", { ...task("pm2"), newAssigneeId: "tm" })).toBe(false);
+    expect(can(tm, "task.assign", { ...task("tm"), newAssigneeId: null })).toBe(false); // unassign
+    expect(can(pm, "task.assign", { ...task("tm"), newAssigneeId: null })).toBe(true);
+    expect(can(other, "task.assign", { ...task("tm"), newAssigneeId: "pm2" })).toBe(false);
+  });
+
+  it("lets only admins and the manager delete tasks", () => {
+    expect(can(pm, "task.delete", project)).toBe(true);
+    expect(can(other, "task.delete", project)).toBe(false);
+    expect(can(tm, "task.delete", project)).toBe(false);
+  });
+});

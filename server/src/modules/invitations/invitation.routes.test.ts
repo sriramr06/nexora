@@ -304,3 +304,58 @@ describe("public side: lookup, register, accept (US-13, US-14, FR-INV-06 – 08)
     expect((await accept()).status).toBe(400);
   });
 });
+
+describe("project pre-selection (US-34, R11, R13)", () => {
+  const createProject = async (user: TestUser, name: string) =>
+    (
+      await request(app)
+        .post(`/api/v1/orgs/${orgId}/projects`)
+        .set("Authorization", bearer(user))
+        .send({ name })
+    ).body.data.id as string;
+
+  it("adds the new member to pre-selected active projects on acceptance", async () => {
+    const alpha = await createProject(arun, "Alpha");
+    const beta = await createProject(arun, "Beta");
+    const res = await invite(arun, {
+      email: "ravi@acme.test",
+      role: "member",
+      projectIds: [alpha, beta],
+    });
+    expect(res.status).toBe(201);
+    expect(res.body.data.invitation.projects.map((p: { name: string }) => p.name).sort()).toEqual([
+      "Alpha",
+      "Beta",
+    ]);
+    const token = email.lastToken()!;
+
+    // Beta is archived before acceptance → not joined (R13).
+    await request(app)
+      .post(`/api/v1/orgs/${orgId}/projects/${beta}/archive`)
+      .set("Authorization", bearer(arun));
+
+    const reg = await request(app)
+      .post("/api/v1/invitations/register")
+      .send({ token, name: "Ravi", password: "secret123" });
+    const raviId = reg.body.data.user.id;
+
+    const alphaDoc = await request(app)
+      .get(`/api/v1/orgs/${orgId}/projects/${alpha}`)
+      .set("Authorization", bearer(arun));
+    expect(alphaDoc.body.data.members.map((m: { id: string }) => m.id)).toContain(raviId);
+    const betaDoc = await request(app)
+      .get(`/api/v1/orgs/${orgId}/projects/${beta}`)
+      .set("Authorization", bearer(arun));
+    expect(betaDoc.body.data.members.map((m: { id: string }) => m.id)).not.toContain(raviId);
+  });
+
+  it("stops a Project Manager pre-selecting a project they do not manage (R11)", async () => {
+    const adminsProject = await createProject(priya, "Admin's");
+    const res = await invite(arun, {
+      email: "x@acme.test",
+      role: "member",
+      projectIds: [adminsProject],
+    });
+    expect(res.status).toBe(403);
+  });
+});

@@ -6,6 +6,7 @@ import { forTenant } from "../../common/db/tenant-scope";
 import { withTransaction } from "../../common/db/transaction";
 import type { TenantContext } from "../../common/middleware/tenancy";
 import { revokePendingInvitationsBy } from "../invitations/invitation.service";
+import { onDemotedToMember, onMemberLeavingOrganization } from "../projects/project.service";
 import { OrganizationModel } from "../organizations/organization.model";
 import { UserModel } from "../users/user.model";
 import { MembershipModel } from "./membership.model";
@@ -135,7 +136,11 @@ export const changeRole = async (
         { $set: { role, updatedBy: actor.userId } },
         { session },
       );
-      if (role === "member") await applyR12(organization._id, previousRole, target.userId, session);
+      if (role === "member") {
+        await applyR12(organization._id, previousRole, target.userId, session);
+        // R6 / R3: a Team Member cannot manage projects.
+        await onDemotedToMember(organization._id, target.userId, session);
+      }
     });
   }
 
@@ -154,6 +159,7 @@ const removeMembership = async (
   organizationId: Types.ObjectId,
   target: { _id: Types.ObjectId; userId: Types.ObjectId; role: OrgRole },
   lastAdminMessage: string,
+  actorId: Types.ObjectId,
 ) =>
   withTransaction(async (session) => {
     if (target.role === "admin") {
@@ -161,7 +167,9 @@ const removeMembership = async (
     }
     await MembershipModel.deleteOne({ _id: target._id, organizationId }, { session });
     await applyR12(organizationId, target.role, target.userId, session);
-    // R5 / R6 (unassign open tasks, unset managed projects) arrive with projects in Sprint 6.
+    // R5 / R6 data part: open tasks unassigned, managed projects unset, removed from
+    // project member lists — all in this transaction. (Notifications: Sprint 6.)
+    await onMemberLeavingOrganization(organizationId, target.userId, actorId, session);
   });
 
 // FR-MEM-03 (Tenant Admin only). Removing yourself is "leave", a separate action.
@@ -177,6 +185,7 @@ export const removeMember = async (
     organization._id,
     target,
     "This is the only Tenant Admin and cannot be removed.",
+    actor.userId,
   );
 };
 
@@ -186,5 +195,6 @@ export const leaveOrganization = async ({ organization, membership }: TenantCont
     organization._id,
     membership,
     "You are the only Tenant Admin. Make someone else an admin before leaving.",
+    membership.userId,
   );
 };

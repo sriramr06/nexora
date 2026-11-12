@@ -94,14 +94,14 @@ const useInvitationMutation = <TArgs, TResult>(
 export const useInvite = (orgId: string) =>
   useInvitationMutation(
     orgId,
-    async (body: { email: string; role: OrgRole }) =>
+    async (body: { email: string; role: OrgRole; projectIds: string[] }) =>
       (await api.post<{ data: InviteResult }>(`/orgs/${orgId}/invitations`, body)).data.data,
   );
 
 export const useBulkInvite = (orgId: string) =>
   useInvitationMutation(
     orgId,
-    async (body: { emails: string[]; role: OrgRole }) =>
+    async (body: { emails: string[]; role: OrgRole; projectIds: string[] }) =>
       (await api.post<{ data: BulkInviteResult[] }>(`/orgs/${orgId}/invitations/bulk`, body)).data
         .data,
   );

@@ -10,6 +10,9 @@ import "../modules/organizations/organization.model";
 import "../modules/members/membership.model";
 import "../modules/invitations/invitation.model";
 import "../modules/users/avatar.model";
+import "../modules/projects/project.model";
+import "../modules/tasks/task.model";
+import "../modules/activity/activity.model";
 
 // Creates missing indexes and drops indexes no longer defined in the schemas (DEP-9).
 // Runs in the deploy pipeline because autoIndex is disabled in production.

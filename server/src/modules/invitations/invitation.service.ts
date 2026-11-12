@@ -1,4 +1,4 @@
-import type { ClientSession, QueryFilter, Types } from "mongoose";
+import { Types, type ClientSession, type QueryFilter } from "mongoose";
 import {
   can,
   emailSchema,
@@ -25,6 +25,9 @@ import { appLink, invitationEmail } from "../email/templates";
 import { MembershipModel } from "../members/membership.model";
 import { OrganizationModel } from "../organizations/organization.model";
 import { UserModel } from "../users/user.model";
+import { recordActivity } from "../activity/activity.service";
+import { ProjectModel } from "../projects/project.model";
+import { managedProjectIds } from "../projects/project.service";
 import { InvitationModel, type InvitationDoc, type InvitationRecord } from "./invitation.model";
 
 const INVITATION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // FR-INV-02
@@ -46,6 +49,7 @@ const invalidInvitation = (message = "This invitation link is invalid.") =>
 const toInvitation = (
   inv: InvitationRecord & { _id: Types.ObjectId },
   inviters: Map<string, string>,
+  projects: Map<string, string>,
 ): Invitation => {
   const inviterName = inviters.get(String(inv.invitedBy));
   return {
@@ -54,6 +58,10 @@ const toInvitation = (
     role: inv.role,
     status: listStatus(inv),
     invitedBy: inviterName ? { id: String(inv.invitedBy), name: inviterName } : null,
+    projects: (inv.projectIds ?? []).flatMap((id) => {
+      const name = projects.get(String(id));
+      return name ? [{ id: String(id), name }] : [];
+    }),
     lastSentAt: inv.lastSentAt.toISOString(),
     expiresAt: inv.expiresAt.toISOString(),
     createdAt: inv.createdAt.toISOString(),
@@ -65,6 +73,15 @@ const inviterNames = async (ids: Types.ObjectId[]) => {
     .select("name")
     .lean();
   return new Map(users.map((u) => [String(u._id), u.name]));
+};
+
+const projectNames = async (organizationId: Types.ObjectId, ids: Types.ObjectId[]) => {
+  if (ids.length === 0) return new Map<string, string>();
+  const projects = await forTenant(ProjectModel, organizationId)
+    .find({ _id: { $in: ids } })
+    .select("name")
+    .lean();
+  return new Map(projects.map((p) => [String(p._id), p.name]));
 };
 
 const actorOf = ({ membership }: TenantContext) => ({
@@ -104,13 +121,37 @@ const issueInvitation = async (
   inviter: AuthUser,
   email: string,
   role: OrgRole,
+  projectIds: string[],
 ): Promise<{ invitation: InvitationDoc; token: string }> => {
-  // R11: Project Managers invite Team Members only (project pre-selection: Sprint 4).
-  if (!can(actorOf(tenant), "invitation.create", { role, projectIds: [], managedProjectIds: [] })) {
-    throw AppError.forbidden("You can only invite people as Team Members.");
+  const orgId = tenant.organization._id;
+  const uniqueProjectIds = [...new Set(projectIds)];
+
+  // R11: Project Managers invite Team Members only, to projects they manage.
+  const managed =
+    tenant.membership.role === "project_manager"
+      ? await managedProjectIds(orgId, tenant.membership.userId)
+      : [];
+  if (
+    !can(actorOf(tenant), "invitation.create", {
+      role,
+      projectIds: uniqueProjectIds,
+      managedProjectIds: managed,
+    })
+  ) {
+    throw AppError.forbidden(
+      "Project Managers can invite Team Members only, to projects they manage.",
+    );
+  }
+  if (uniqueProjectIds.length > 0) {
+    const active = await forTenant(ProjectModel, orgId).countDocuments({
+      _id: { $in: uniqueProjectIds },
+      status: "active",
+    });
+    if (active !== uniqueProjectIds.length) {
+      throw AppError.validation("Choose active projects in this organization.");
+    }
   }
 
-  const orgId = tenant.organization._id;
   const existingUser = await UserModel.findOne({ email }).select("platformRole").lean();
   if (existingUser?.platformRole === "owner") {
     throw AppError.validation("This email cannot be invited."); // R8 / FR-INV-09
@@ -127,6 +168,7 @@ const issueInvitation = async (
   const now = new Date();
   const fresh = {
     role,
+    projectIds: uniqueProjectIds.map((id) => new Types.ObjectId(id)),
     tokenHash: hashToken(token),
     expiresAt: new Date(now.getTime() + INVITATION_TTL_MS),
     invitedBy: inviter._id,
@@ -159,19 +201,20 @@ const issueInvitation = async (
 export const createInvitation = async (
   tenant: TenantContext,
   inviter: AuthUser,
-  { email, role }: { email: string; role: OrgRole },
+  { email, role, projectIds = [] }: { email: string; role: OrgRole; projectIds?: string[] },
 ): Promise<InviteResult> => {
-  const { invitation, token } = await issueInvitation(tenant, inviter, email, role);
+  const { invitation, token } = await issueInvitation(tenant, inviter, email, role, projectIds);
   const emailSent = await sendInvitationEmail(tenant, inviter, invitation, token);
   const names = new Map([[String(inviter._id), inviter.name]]);
-  return { invitation: toInvitation(invitation.toObject(), names), emailSent };
+  const projects = await projectNames(tenant.organization._id, invitation.projectIds);
+  return { invitation: toInvitation(invitation.toObject(), names, projects), emailSent };
 };
 
 // FR-INV-12: each address is validated and processed independently.
 export const createBulkInvitations = async (
   tenant: TenantContext,
   inviter: AuthUser,
-  { emails, role }: { emails: string[]; role: OrgRole },
+  { emails, role, projectIds = [] }: { emails: string[]; role: OrgRole; projectIds?: string[] },
 ): Promise<BulkInviteResult[]> => {
   const results: BulkInviteResult[] = [];
   const seen = new Set<string>();
@@ -190,7 +233,7 @@ export const createBulkInvitations = async (
     }
     seen.add(email);
     try {
-      const issued = await issueInvitation(tenant, inviter, email, role);
+      const issued = await issueInvitation(tenant, inviter, email, role, projectIds);
       toSend.push({ index: results.length, ...issued });
       results.push({ email, outcome: "sent" });
     } catch (error) {
@@ -243,8 +286,12 @@ export const listInvitations = async (
       .lean(),
   ]);
   const names = await inviterNames(docs.map((d) => d.invitedBy));
+  const projects = await projectNames(
+    tenant.organization._id,
+    docs.flatMap((d) => d.projectIds ?? []),
+  );
   return {
-    items: docs.map((d) => toInvitation(d, names)),
+    items: docs.map((d) => toInvitation(d, names, projects)),
     pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
   };
 };
@@ -294,7 +341,8 @@ export const resendInvitation = async (
 
   const emailSent = await sendInvitationEmail(tenant, user, invitation, token);
   const names = await inviterNames([invitation.invitedBy]);
-  return { invitation: toInvitation(invitation.toObject(), names), emailSent };
+  const projects = await projectNames(tenant.organization._id, invitation.projectIds);
+  return { invitation: toInvitation(invitation.toObject(), names, projects), emailSent };
 };
 
 export const revokeInvitation = async (
@@ -313,7 +361,8 @@ export const revokeInvitation = async (
   invitation.set({ status: "revoked", revokedBy: user._id, revokedAt: new Date() });
   await invitation.save();
   const names = await inviterNames([invitation.invitedBy]);
-  return toInvitation(invitation.toObject(), names);
+  const projects = await projectNames(tenant.organization._id, invitation.projectIds);
+  return toInvitation(invitation.toObject(), names, projects);
 };
 
 // R12: when a Project Manager is removed or demoted, their pending invitations are revoked
@@ -405,6 +454,34 @@ const joinOrganization = async (
     { userId, role: invitation.role },
     session,
   );
+
+  // R13: join the pre-selected projects that still exist and are not archived.
+  if (invitation.projectIds.length > 0) {
+    const projects = await ProjectModel.find({
+      organizationId: invitation.organizationId,
+      _id: { $in: invitation.projectIds },
+      status: "active",
+    })
+      .session(session)
+      .select("name")
+      .lean();
+    await ProjectModel.updateMany(
+      { organizationId: invitation.organizationId, _id: { $in: projects.map((p) => p._id) } },
+      { $addToSet: { memberIds: userId } },
+      { session },
+    );
+    await recordActivity(
+      session,
+      ...projects.map((p) => ({
+        organizationId: invitation.organizationId,
+        projectId: p._id,
+        actorId: invitation.invitedBy,
+        action: "project.member_added" as const,
+        changes: { member: { from: null, to: String(userId) } },
+        snapshot: { projectName: p.name },
+      })),
+    );
+  }
 };
 
 // FR-INV-07: an existing user accepts after logging in with the invited email.
