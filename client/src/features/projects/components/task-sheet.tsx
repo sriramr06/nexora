@@ -38,6 +38,8 @@ import {
   useUpdateTask,
 } from "../projects-api";
 import { describeActivity } from "./activity-text";
+import { TaskComments } from "./task-comments";
+import { TaskWorkflow } from "./task-workflow";
 import { DueDate, PriorityLabel, TaskStatusBadge } from "./task-badges";
 
 const factsFor = (project: Project, task: Task) => ({
@@ -335,8 +337,10 @@ export function TaskSheet({ taskId, onClose }: { taskId: string; onClose: () => 
             </SheetHeader>
 
             <div className="grid gap-6 p-4">
+              <TaskWorkflow task={t} project={p} />
               <AssigneeControl task={t} project={p} />
               <DetailsForm key={t.id} task={t} editable={editable} />
+              <TaskComments taskId={t.id} project={p} />
               <section aria-labelledby="history-heading" className="grid gap-3 border-t pt-4">
                 <h3 id="history-heading" className="text-sm font-medium">
                   History
