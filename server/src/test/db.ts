@@ -7,7 +7,11 @@ import { connectDb, disconnectDb } from "../common/db/connection";
 let replSet: MongoMemoryReplSet | undefined;
 
 export async function startTestDb() {
-  replSet = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
+  // Generous launch timeout: many test files start a database in parallel (CI, busy machines).
+  replSet = await MongoMemoryReplSet.create({
+    replSet: { count: 1 },
+    instanceOpts: [{ launchTimeout: 60_000 }],
+  });
   await connectDb(replSet.getUri());
 }
 

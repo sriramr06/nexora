@@ -53,6 +53,8 @@ Permissions referenced below are defined in Step 2.2 — Roles and Permission Re
 | FR-ORG-06 | The system shall allow a user who belongs to multiple organizations to switch the active organization. | M |
 | FR-ORG-07 | The system shall show a user with no memberships the options to register an organization or wait for an invitation. | M |
 | FR-ORG-08 | The system shall email the submitting Tenant Admin when their organization is approved or rejected. | M |
+| FR-ORG-09 | The system shall allow a user at most one organization they created in Pending Approval or Rejected status at a time (added 12 Nov 2026). | M |
+| FR-ORG-10 | The system shall email all Tenant Admins when their organization is suspended (with the reason) or reactivated (added 12 Nov 2026). | S |
 
 ## 5. Platform Administration (PLAT)
 

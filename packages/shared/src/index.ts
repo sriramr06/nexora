@@ -4,3 +4,5 @@
 export * from "./api";
 export * from "./constants";
 export * from "./schemas/auth";
+export * from "./schemas/organization";
+export * from "./permissions";

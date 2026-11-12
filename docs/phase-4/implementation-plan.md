@@ -3,7 +3,7 @@
 **Project:** Nexora — Multi-Tenant Project Management SaaS  
 **Phase:** 4 — Implementation Planning  
 **Step:** 4.1 — Implementation Plan  
-**Version:** 1.0  
+**Version:** 1.1 (12 Nov 2026: pace doubled, see §2.1)  
 **Status:** Approved
 
 ## 1. Objective
@@ -16,13 +16,23 @@ Turn the Phase 2 requirements and Phase 3 design into a sprint-by-sprint build p
 |---|---|
 | Start date | Friday 6 November 2026 |
 | Availability | Full-time, 6–8 hours per day |
-| Sprint length | 1 week (Sprint 1: 10 days) |
-| Planned duration | 7 sprints, ending 27 December 2026 |
-| Reserve | 28 December 2026 – 3 January 2027 (within the PID's 8-week ceiling) |
+| Sprint length | Sprint 1: 10 days (finished 12 Nov); Sprints 2–7: 3–4 days (§2.1) |
+| Planned duration | 7 sprints, ending 3 December 2026 |
+| Reserve | 4 – 10 December 2026 (within the PID's 8-week ceiling) |
 | Tracking | Sprint checklist per sprint in `docs/sprints/sprint-N.md` (stories and tasks as checkboxes); pull requests reference story IDs (e.g. "US-03") |
 | Sprint start | Select stories and tasks for the sprint (15 minutes) |
 | Sprint end | Review and retrospective notes in `docs/sprints/sprint-N.md` (15 minutes) |
 | Branching | Feature branches → pull request → protected `main` (DEP-7) |
+
+### 2.1 Pace Change (v1.1, 12 November 2026)
+
+Sprint 1 finished three days early, and the product must be demo-ready for interviews, so the remaining sprints run at double pace with the same scope and cut list:
+
+1. **Schedule:** Sprint durations halved (dates in §4).
+2. **Decisions:** Phase 3 decisions are not re-opened. Each sprint starts with one batch of genuinely open questions, each with a recommendation ("ok" accepts all).
+3. **Build:** each story is built end to end (backend, tests, client, browser check). One pull request per epic, with interview notes on the tricky parts.
+4. **Pull requests:** opened, checked and merged through the GitHub CLI after approval.
+5. **Learning:** by reviewing the pull requests; dnd-kit still at the start of Sprint 5.
 
 ## 3. Key Principles
 
@@ -50,7 +60,7 @@ Turn the Phase 2 requirements and Phase 3 design into a sprint-by-sprint build p
 
 **Stories:** US-01 – US-05.
 
-### Sprint 2 — Organizations, Platform and Tenancy (16 – 22 Nov)
+### Sprint 2 — Organizations, Platform and Tenancy (13 – 16 Nov)
 
 **Goal:** organizations can register, be approved and be accessed securely.
 
@@ -63,7 +73,7 @@ Turn the Phase 2 requirements and Phase 3 design into a sprint-by-sprint build p
 
 **Stories:** US-06 – US-11, US-33 (harness).
 
-### Sprint 3 — Members, Invitations and Profile (23 – 29 Nov)
+### Sprint 3 — Members, Invitations and Profile (17 – 19 Nov)
 
 **Goal:** teams can be built and managed.
 
@@ -73,7 +83,7 @@ Turn the Phase 2 requirements and Phase 3 design into a sprint-by-sprint build p
 
 **Stories:** US-12 – US-16, US-31, US-32, US-34, US-35.
 
-### Sprint 4 — Projects and Tasks Core (30 Nov – 6 Dec)
+### Sprint 4 — Projects and Tasks Core (20 – 23 Nov)
 
 **Goal:** projects and tasks work end to end with history.
 
@@ -84,7 +94,7 @@ Turn the Phase 2 requirements and Phase 3 design into a sprint-by-sprint build p
 
 **Stories:** US-17 – US-24, US-27.
 
-### Sprint 5 — Kanban and Workflow (7 – 13 Dec)
+### Sprint 5 — Kanban and Workflow (24 – 27 Nov)
 
 **Goal:** the board and review / blocker workflow.
 
@@ -97,7 +107,7 @@ Turn the Phase 2 requirements and Phase 3 design into a sprint-by-sprint build p
 
 **Stories:** US-25, US-26, US-28, US-36 – US-38, US-19.
 
-### Sprint 6 — Notifications, Rules and Polish (14 – 20 Dec)
+### Sprint 6 — Notifications, Rules and Polish (28 – 30 Nov)
 
 **Goal:** collaboration signals and complete business rules.
 
@@ -108,7 +118,7 @@ Turn the Phase 2 requirements and Phase 3 design into a sprint-by-sprint build p
 
 **Stories:** US-15 (cascades), US-29, US-30.
 
-### Sprint 7 — Hardening and Release (21 – 27 Dec)
+### Sprint 7 — Hardening and Release (1 – 3 Dec)
 
 **Goal:** a verified, documented, deployed MVP.
 
@@ -153,4 +163,4 @@ If the project is more than about 2 working days behind at the end of Sprint 4, 
 | Deployment complexity | Walking skeleton deployed in Sprint 1; every sprint deploys |
 | Inadequate stabilization time | Sprint 7 dedicated to hardening; reserve week after it |
 
-**Next step:** Sprint 1.
+**Next step:** Sprint 2.

@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router";
+import { NavLink, Outlet, useMatch } from "react-router";
 import { LogOutIcon, MailWarningIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useCurrentUser } from "@/lib/auth-store";
 import { useLogout } from "@/features/auth/auth-api";
 import { ResendVerificationButton } from "@/features/auth/components/resend-verification-button";
+import { OrgSwitcher } from "@/features/organizations/components/org-switcher";
 
 // Centered card for login, register and the email-link pages.
 export function AuthLayout() {
@@ -27,22 +28,30 @@ export function AuthLayout() {
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground";
 
-// Shell for logged-in pages. Grows a sidebar with organizations in Sprint 2.
+// Shell for logged-in pages: organization switcher for members, platform nav for the Owner.
 export function AppLayout() {
   const user = useCurrentUser();
   const logout = useLogout();
+  const isOwner = user.platformRole === "owner";
+  const orgMatch = useMatch("/o/:orgId/*");
 
   return (
     <div className="min-h-svh bg-muted/40">
       <header className="border-b bg-background">
-        <div className="mx-auto flex h-14 max-w-5xl items-center gap-6 px-4">
-          <Logo />
+        <div className="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4 sm:gap-4">
+          <Logo compact />
+          {!isOwner && <OrgSwitcher currentOrgId={orgMatch?.params.orgId} />}
           <nav className="flex gap-4 text-sm">
+            {isOwner && (
+              <NavLink to="/platform/organizations" className={navLinkClass}>
+                Organizations
+              </NavLink>
+            )}
             <NavLink to="/account" className={navLinkClass}>
               Account
             </NavLink>
           </nav>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
             <span className="hidden text-sm text-muted-foreground sm:inline">{user.name}</span>
             <ThemeToggle />
             <Button
@@ -50,8 +59,9 @@ export function AppLayout() {
               size="sm"
               disabled={logout.isPending}
               onClick={() => logout.mutate()}
+              aria-label="Log out"
             >
-              <LogOutIcon aria-hidden /> Log out
+              <LogOutIcon aria-hidden /> <span className="hidden sm:inline">Log out</span>
             </Button>
           </div>
         </div>

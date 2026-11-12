@@ -1,6 +1,8 @@
 import { Navigate, Outlet, useLocation, type Location } from "react-router";
 import { Loader2Icon } from "lucide-react";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore, useCurrentUser } from "@/lib/auth-store";
+import { pickHomeOrg } from "@/features/organizations/last-org";
+import { useMyOrganizations } from "@/features/organizations/org-api";
 import { VerifyEmailPrompt } from "./layouts";
 
 interface FromState {
@@ -41,6 +43,31 @@ export function RequireGuest() {
   if (status === "pending") return <FullPageLoader />;
   if (status === "authenticated") return <Navigate to={redirectTarget(location)} replace />;
   return <Outlet />;
+}
+
+const isOwner = (user: { platformRole?: string }) => user.platformRole === "owner";
+
+// Platform pages (tenancy design §5). UI routing only; /platform is enforced by the API.
+export function RequireOwner() {
+  return isOwner(useCurrentUser()) ? <Outlet /> : <Navigate to="/" replace />;
+}
+
+// Tenant pages: the Application Owner has no memberships (R8), so send them to the platform.
+export function RequireTenantUser() {
+  return isOwner(useCurrentUser()) ? <Navigate to="/platform/organizations" replace /> : <Outlet />;
+}
+
+// Logged-in "/" (FE §5): Owner → platform; member → last used organization, else the first;
+// nobody → /welcome.
+export function AppHomeRedirect() {
+  const user = useCurrentUser();
+  const owner = isOwner(user);
+  const orgs = useMyOrganizations(!owner);
+
+  if (owner) return <Navigate to="/platform/organizations" replace />;
+  if (orgs.isPending) return <FullPageLoader />;
+  const home = orgs.data && pickHomeOrg(user.id, orgs.data);
+  return <Navigate to={home ? `/o/${home.id}` : "/welcome"} replace />;
 }
 
 // Verified-only routes (FR-AUTH-05), e.g. organization registration. Use inside RequireAuth.

@@ -53,7 +53,7 @@ A keyboard / menu alternative ("Move to…") performs the same mutation.
 |---|---|---|
 | `/login`, `/register`, `/forgot-password` | Public | Auth pages |
 | `/verify-email?token=`, `/reset-password?token=`, `/invite?token=` | Public | Token pages (token sent to the API in the body) |
-| `/` | Public / User | Landing page for visitors (UI-6); logged-in users go to the last used organization or `/welcome` |
+| `/` | Public / User | Landing page for visitors (UI-6); logged-in users go to the last used organization (kept in `localStorage`, falling back to the first membership) or `/welcome` |
 | `/welcome` | User | No memberships: register an organization or wait for an invitation |
 | `/organizations/new` | Verified | Organization registration form |
 | `/account` | User | Profile, avatar, change password |
