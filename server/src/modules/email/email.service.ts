@@ -1,6 +1,7 @@
 import nodemailer, { type Transporter } from "nodemailer";
 import { env } from "../../config/env";
 import { logger } from "../../common/logger";
+import { GmailApiEmailService } from "./gmail-api";
 
 export interface EmailMessage {
   to: string;
@@ -60,7 +61,19 @@ export class SmtpEmailService implements EmailService {
 }
 
 const createEmailService = (): EmailService => {
-  return env.EMAIL_TRANSPORT === "smtp" ? new SmtpEmailService() : new ConsoleEmailService();
+  switch (env.EMAIL_TRANSPORT) {
+    case "smtp":
+      return new SmtpEmailService();
+    case "gmail_api":
+      return new GmailApiEmailService({
+        clientId: env.GMAIL_CLIENT_ID!,
+        clientSecret: env.GMAIL_CLIENT_SECRET!,
+        refreshToken: env.GMAIL_REFRESH_TOKEN!,
+        from: env.EMAIL_FROM,
+      });
+    default:
+      return new ConsoleEmailService();
+  }
 };
 
 let current: EmailService = createEmailService();

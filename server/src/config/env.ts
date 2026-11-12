@@ -20,21 +20,40 @@ const envSchema = z
     JWT_ACCESS_SECRET: z.string().min(32, "JWT_ACCESS_SECRET must be at least 32 characters"),
 
     // Email (INT-1, INT-2): "console" prints emails, "smtp" sends them.
-    EMAIL_TRANSPORT: z.enum(["console", "smtp"]).default("console"),
+    EMAIL_TRANSPORT: z.enum(["console", "smtp", "gmail_api"]).default("console"),
     EMAIL_FROM: z.string().min(1).default("Nexora <no-reply@nexora.local>"),
     // Empty strings (e.g. "SMTP_HOST=" in .env) are treated as not set.
     SMTP_HOST: z.preprocess(emptyToUndefined, z.string().optional()),
     SMTP_PORT: z.coerce.number().int().positive().default(587),
     SMTP_USER: z.preprocess(emptyToUndefined, z.string().optional()),
     SMTP_PASS: z.preprocess(emptyToUndefined, z.string().optional()),
+    // Gmail API over HTTPS (INT-1): OAuth client + refresh token with the gmail.send scope.
+    GMAIL_CLIENT_ID: z.preprocess(emptyToUndefined, z.string().optional()),
+    GMAIL_CLIENT_SECRET: z.preprocess(emptyToUndefined, z.string().optional()),
+    GMAIL_REFRESH_TOKEN: z.preprocess(emptyToUndefined, z.string().optional()),
   })
   .superRefine((env, ctx) => {
-    if (env.NODE_ENV === "production" && env.EMAIL_TRANSPORT !== "smtp") {
+    if (env.NODE_ENV === "production" && env.EMAIL_TRANSPORT === "console") {
       ctx.addIssue({
         code: "custom",
         path: ["EMAIL_TRANSPORT"],
-        message: "EMAIL_TRANSPORT must be smtp in production",
+        message: "EMAIL_TRANSPORT must be smtp or gmail_api in production",
       });
+    }
+    if (env.EMAIL_TRANSPORT === "gmail_api") {
+      for (const key of [
+        "GMAIL_CLIENT_ID",
+        "GMAIL_CLIENT_SECRET",
+        "GMAIL_REFRESH_TOKEN",
+      ] as const) {
+        if (!env[key]) {
+          ctx.addIssue({
+            code: "custom",
+            path: [key],
+            message: `${key} is required for gmail_api`,
+          });
+        }
+      }
     }
     if (env.EMAIL_TRANSPORT === "smtp") {
       for (const key of ["SMTP_HOST", "SMTP_USER", "SMTP_PASS"] as const) {
