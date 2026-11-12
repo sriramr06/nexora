@@ -22,6 +22,32 @@ export interface PermissionContext {
   "member.changeRole": undefined; // last-admin rule (R1) is checked in the transaction
   "member.remove": undefined;
   "org.leave": undefined;
+
+  // Roles §5.2 — projects. "managerId / memberIds" are loaded by the server.
+  "project.create": undefined;
+  "project.viewAll": undefined;
+  "project.view": ProjectFacts;
+  "project.update": ProjectFacts; // details, archive / restore
+  "project.setManager": undefined;
+  "project.manageMembers": ProjectFacts;
+  "project.delete": undefined;
+
+  // Roles §5.3 — tasks (status changes and flags arrive with the board, Sprint 5).
+  "task.create": ProjectFacts;
+  "task.edit": ProjectFacts & TaskFacts;
+  // Assign / reassign / unassign. Team Members may only self-assign an unassigned task.
+  "task.assign": ProjectFacts & TaskFacts & { newAssigneeId: string | null };
+  "task.delete": ProjectFacts;
+}
+
+export interface ProjectFacts {
+  managerId: string | null;
+  memberIds: string[];
+}
+
+export interface TaskFacts {
+  assigneeId: string | null;
+  createdBy: string;
 }
 
 export type Action = keyof PermissionContext;
@@ -29,6 +55,12 @@ export type Action = keyof PermissionContext;
 type Rule<A extends Action> = (actor: Actor, context: PermissionContext[A]) => boolean;
 
 const isAdmin = (actor: Actor) => actor.role === "admin";
+const isPmOrAdmin = (actor: Actor) => actor.role === "admin" || actor.role === "project_manager";
+// "Managed project": the actor is its manager (Roles §3.3). In projects they only belong
+// to, Project Managers have Team Member permissions.
+const manages = (actor: Actor, p: ProjectFacts) => p.managerId === actor.userId;
+const belongs = (actor: Actor, p: ProjectFacts) => p.memberIds.includes(actor.userId);
+const adminOrManager = (actor: Actor, p: ProjectFacts) => isAdmin(actor) || manages(actor, p);
 const anyRole = () => true;
 
 // Roles document, section 5.1 (Organization and Members).
@@ -48,6 +80,26 @@ const rules: { [A in Action]: Rule<A> } = {
   "member.changeRole": isAdmin,
   "member.remove": isAdmin,
   "org.leave": anyRole,
+
+  "project.create": isPmOrAdmin,
+  "project.viewAll": isAdmin,
+  "project.view": (actor, p) => isAdmin(actor) || belongs(actor, p),
+  "project.update": adminOrManager,
+  "project.setManager": isAdmin,
+  "project.manageMembers": adminOrManager,
+  "project.delete": isAdmin,
+
+  "task.create": (actor, p) => adminOrManager(actor, p) || belongs(actor, p),
+  // Note 3: Team Members edit tasks assigned to them or created by them.
+  "task.edit": (actor, f) =>
+    adminOrManager(actor, f) ||
+    (belongs(actor, f) && (f.assigneeId === actor.userId || f.createdBy === actor.userId)),
+  "task.assign": (actor, f) => {
+    if (adminOrManager(actor, f)) return true;
+    // Self-assign an unassigned task in a member project (Roles §5.3).
+    return belongs(actor, f) && f.assigneeId === null && f.newAssigneeId === actor.userId;
+  },
+  "task.delete": adminOrManager,
 };
 
 // Overloads keep call sites short: can(actor, "org.update") needs no context.

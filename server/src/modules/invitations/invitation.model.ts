@@ -9,6 +9,8 @@ const invitationSchema = new Schema(
     organizationId: { type: Schema.Types.ObjectId, ref: "Organization", required: true },
     email: { type: String, required: true, lowercase: true, trim: true },
     role: { type: String, enum: ORG_ROLES, required: true },
+    // R13: projects to join on acceptance (only those still active then).
+    projectIds: { type: [{ type: Schema.Types.ObjectId, ref: "Project" }], default: [] },
     tokenHash: { type: String, required: true },
     status: { type: String, enum: INVITATION_STATUSES, required: true, default: "pending" },
     expiresAt: { type: Date, required: true },

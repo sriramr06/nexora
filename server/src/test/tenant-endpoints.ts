@@ -6,7 +6,7 @@
 // (members, invitations, projects, tasks, comments, activity, notifications).
 
 export interface TenantEndpoint {
-  method: "get" | "post" | "patch" | "delete";
+  method: "get" | "post" | "patch" | "put" | "delete";
   path: (orgId: string) => string;
   body?: object;
 }
@@ -45,4 +45,47 @@ export const TENANT_ENDPOINTS: TenantEndpoint[] = [
   },
   { method: "post", path: (o) => `/api/v1/orgs/${o}/invitations/${ANY_ID}/resend` },
   { method: "post", path: (o) => `/api/v1/orgs/${o}/invitations/${ANY_ID}/revoke` },
+  // Sprint 4: projects and tasks
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/projects` },
+  { method: "post", path: (o) => `/api/v1/orgs/${o}/projects`, body: { name: "Hijacked" } },
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}` },
+  {
+    method: "patch",
+    path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}`,
+    body: { name: "Hijacked" },
+  },
+  {
+    method: "put",
+    path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}/manager`,
+    body: { userId: ANY_ID },
+  },
+  {
+    method: "post",
+    path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}/members`,
+    body: { userIds: [ANY_ID] },
+  },
+  { method: "delete", path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}/members/${ANY_ID}` },
+  { method: "post", path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}/archive` },
+  { method: "post", path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}/restore` },
+  { method: "delete", path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}` },
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}/tasks` },
+  {
+    method: "post",
+    path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}/tasks`,
+    body: { title: "x" },
+  },
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/my-tasks` },
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}` },
+  {
+    method: "patch",
+    path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}`,
+    body: { title: "x", priority: "low", dueDate: null, version: 0 },
+  },
+  {
+    method: "put",
+    path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}/assignee`,
+    body: { assigneeId: null, version: 0 },
+  },
+  { method: "delete", path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}` },
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/tasks/${ANY_ID}/activity` },
 ];

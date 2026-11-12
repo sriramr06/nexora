@@ -7,9 +7,15 @@ import { emailSchema, nameSchema, passwordSchema, tokenSchema } from "./auth";
 export const INVITATION_LIST_STATUSES = ["pending", "accepted", "revoked", "expired"] as const;
 export type InvitationListStatus = (typeof INVITATION_LIST_STATUSES)[number];
 
+const projectIdsSchema = z
+  .array(z.string().regex(/^[a-f0-9]{24}$/i, "Invalid project."))
+  .max(50)
+  .default([]);
+
 export const inviteSchema = z.object({
   email: emailSchema,
   role: z.enum(ORG_ROLES, "Select a role."),
+  projectIds: projectIdsSchema, // R13: added on acceptance if still active
 });
 export type InviteInput = z.input<typeof inviteSchema>;
 
@@ -21,6 +27,7 @@ export const bulkInviteSchema = z.object({
     .min(1, "Enter at least one email address.")
     .max(20, "You can invite up to 20 people at a time."),
   role: z.enum(ORG_ROLES, "Select a role."),
+  projectIds: projectIdsSchema,
 });
 export type BulkInviteInput = z.input<typeof bulkInviteSchema>;
 
@@ -45,6 +52,7 @@ export interface Invitation {
   role: OrgRole;
   status: InvitationListStatus; // "expired" is computed, never stored
   invitedBy: { id: string; name: string } | null;
+  projects: { id: string; name: string }[]; // pre-selected (R13)
   lastSentAt: string;
   expiresAt: string;
   createdAt: string;
