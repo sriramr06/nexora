@@ -30,9 +30,9 @@
 
 ## Client Foundations
 
-- [ ] React Router, TanStack Query provider, Zustand auth store
-- [ ] axios client with request interceptor
-- [ ] shadcn/ui initialised
+- [x] React Router, TanStack Query provider, Zustand auth store
+- [x] axios client with request interceptor
+- [x] shadcn/ui initialised
 
 ## Deployment
 
@@ -43,14 +43,14 @@
 
 ## Authentication Stories
 
-- [x] US-01 Register an account (backend)
-- [x] US-02 Verify my email (backend)
-- [x] US-03 Log in and out (refresh rotation, families, grace period) (backend)
-- [x] US-04 Reset a forgotten password (backend)
-- [x] US-05 Change my password (backend)
+- [x] US-01 Register an account
+- [x] US-02 Verify my email
+- [x] US-03 Log in and out (refresh rotation, families, grace period)
+- [x] US-04 Reset a forgotten password
+- [x] US-05 Change my password
 - [x] Email service: console, fake, SMTP
 - [x] Rate limiting on auth endpoints
-- [ ] Client: auth pages, single-flight refresh interceptor, session restore, `RequireAuth`, `RequireVerified`
+- [x] Client: auth pages, single-flight refresh interceptor, session restore, `RequireAuth`, `RequireVerified`
 
 ## Review (end of sprint)
 

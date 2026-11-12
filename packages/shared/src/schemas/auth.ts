@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { PlatformRole } from "../constants";
 
 export const emailSchema = z
   .string()
@@ -64,3 +65,24 @@ export const changePasswordSchema = z.object({
 });
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+// Response shapes
+
+// The user as returned by the API (users.toJSON(): no passwordHash, `id` instead of `_id`).
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  avatar?: { url: string; publicId: string };
+  platformRole?: PlatformRole;
+  lastLoginAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Returned by login, refresh and change-password (the refresh token travels in a cookie).
+export interface AuthSessionData {
+  accessToken: string;
+  user: AuthUser;
+}
