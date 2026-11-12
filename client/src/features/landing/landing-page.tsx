@@ -36,7 +36,7 @@ const columns = [
   },
   {
     name: "In progress",
-    dot: "bg-primary",
+    dot: "bg-chart-2",
     tasks: [
       { title: "Design onboarding flow", who: "PR" },
       { title: "Set up CI pipeline", who: "AK" },

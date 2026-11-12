@@ -1,3 +1,4 @@
+import { MailIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -61,6 +62,7 @@ export function ForgotPasswordPage() {
         <CardContent className="grid gap-4">
           <Field
             label="Email"
+            icon={MailIcon}
             type="email"
             autoComplete="email"
             error={errors.email?.message}

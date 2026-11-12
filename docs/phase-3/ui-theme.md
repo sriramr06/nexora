@@ -3,8 +3,8 @@
 **Project:** Nexora — Multi-Tenant Project Management SaaS  
 **Phase:** 3 — System Design  
 **Step:** 3.6a — UI Theme (supplements Frontend Architecture)  
-**Version:** 1.0  
-**Status:** Locked (12 November 2026)
+**Version:** 1.1 (Pine Teal, 12 November 2026)  
+**Status:** Locked
 
 ## 1. Objective
 
@@ -14,33 +14,33 @@ Fix the visual language of the client — colours, greys, dark mode, typography 
 
 | ID | Concern | Decision |
 |---|---|---|
-| UI-1 | Brand colour | **Indigo** `#4f46e5` (indigo-600) for primary buttons, links and focus rings; matches the email templates |
-| UI-2 | Greys | **Slate** scale for backgrounds, borders and secondary text |
+| UI-1 | Brand colour | **Pine Teal** `#0f6b62` for primary buttons, links and focus rings; brand panel `#0d3b37`; email buttons match. (v1.0 used indigo `#4f46e5`; replaced as too bright and plain.) |
+| UI-2 | Greys | **Green-grey** neutrals (page `#f6f8f7`, borders `#dbe4e1`, secondary text `#5b6c69`) |
 | UI-3 | Dark mode | **Light / dark / system** from the start; default follows the OS; toggle in every header |
 | UI-4 | Typography | **Geist** (variable font, self-hosted via `@fontsource-variable/geist`) |
 | UI-5 | Density | shadcn/ui **compact** defaults (32 px controls, `--radius: 0.625rem`) |
 | UI-6 | Landing page | Public `/`: header, hero (Get started → `/register`, Log in → `/login`), product preview, three feature cards, footer |
-| UI-7 | Style | **Minimal and flat.** Solid colours, thin borders, whitespace. **No neon colours, glows or gradients.** |
+| UI-7 | Style | **Minimal and flat.** Solid colours, thin borders, whitespace. **No neon colours, glows, gradients or blur.** Focus rings are thin (2 px, 25 %). |
+| UI-8 | Auth pages | Split layout: solid brand panel (headline + mini board) beside the form on wide screens, form only on phones. Inputs with leading icons (40 px), show / hide on every password field, live password rules on new-password fields. |
 
 ## 3. Tokens
 
-Defined once in `client/src/index.css` as CSS variables (OKLCH, Tailwind scales); components use only the token classes (`bg-primary`, `text-muted-foreground`, `border`, …), never raw colours.
+Defined once in `client/src/index.css` as CSS variables; components use only the token classes (`bg-primary`, `text-muted-foreground`, `bg-brand`, …), never raw colours.
 
 | Token | Light | Dark |
 |---|---|---|
-| `background` | white | slate-950 |
-| `foreground` | slate-950 | slate-50 |
-| `card` / `popover` | white | slate-900 |
-| `primary` | indigo-600 (white text, 6.3:1) | indigo-400 (slate-950 text) |
-| `muted` / `secondary` / `accent` | slate-100 | slate-800 |
-| `muted-foreground` | slate-500 (4.8:1 on white) | slate-400 |
-| `border` / `input` | slate-200 | white 10% / 15% |
-| `ring` | indigo-600 | indigo-400 |
-| `destructive` | red-600 | red-400 |
+| `background` | `#f6f8f7` | `#0c1312` |
+| `foreground` | `#122220` | `#e4eeec` |
+| `card` / `popover` | `#ffffff` | `#111a19` / `#142120` |
+| `primary` | `#0f6b62` (white text, 6.4:1) | `#5cbfb1` (dark text `#062420`) |
+| `muted` / `secondary` / `accent` | `#eaf0ee` / `#e3ece9` | `#1b2827` / `#213130` |
+| `muted-foreground` | `#5b6c69` (5.2:1 on white) | `#93a6a3` |
+| `border` / `input` | `#dbe4e1` / `#d3dedb` | white 9 % / 14 % |
+| `brand` / `brand-foreground` | `#0d3b37` / `#e7f5f2` | `#0e2a27` / `#d9f1ec` |
+| `chart-1 … 5` | teal, blue (in progress), amber (review / pending), rose, grey | lighter variants |
+| `destructive` | `#c2410c` | `#f2805a` |
 
-In dark mode the primary is indigo-400 with dark text because white on indigo-500 is 4.47:1, just below WCAG AA (NFR-USE-03).
-
-Task status colours are decided with the Kanban board (Sprint 5), using the `chart-*` tokens.
+In dark mode the primary is a lighter teal with dark text, keeping contrast above WCAG AA (NFR-USE-03). Blue is reserved for "in progress" so it never competes with the brand teal.
 
 ## 4. Dark Mode Implementation
 
@@ -52,4 +52,4 @@ Task status colours are decided with the Kanban board (Sprint 5), using the `cha
 
 1. Use token classes only — no `bg-white`, `text-black`, `slate-*`/`gray-*`, hex values or `bg-gradient-*`.
 2. No glow shadows, blur blobs or animated backgrounds; at most `shadow-sm` / `shadow-md` on overlays.
-3. Check every new page in light and dark mode and at 390 px width.
+3. Check every new page in light and dark mode and at 360 px width.

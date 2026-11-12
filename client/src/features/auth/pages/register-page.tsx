@@ -1,5 +1,6 @@
+import { LockIcon, MailIcon, UserIcon } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router";
 import { useMutation } from "@tanstack/react-query";
@@ -14,7 +15,7 @@ import {
 import { toApiError } from "@/lib/api-error";
 import { applyServerErrors } from "@/lib/form-errors";
 import { authApi } from "../auth-api";
-import { Field, FormError, SubmitButton } from "../components/form-parts";
+import { Field, FormError, PasswordRules, SubmitButton } from "../components/form-parts";
 
 export function RegisterPage() {
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
@@ -24,6 +25,7 @@ export function RegisterPage() {
     defaultValues: { name: "", email: "", password: "" },
   });
   const { errors, isSubmitting } = form.formState;
+  const passwordValue = useWatch({ control: form.control, name: "password" });
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {
@@ -67,12 +69,14 @@ export function RegisterPage() {
         <CardContent className="grid gap-4">
           <Field
             label="Name"
+            icon={UserIcon}
             autoComplete="name"
             error={errors.name?.message}
             {...form.register("name")}
           />
           <Field
             label="Email"
+            icon={MailIcon}
             type="email"
             autoComplete="email"
             error={errors.email?.message}
@@ -80,10 +84,11 @@ export function RegisterPage() {
           />
           <Field
             label="Password"
+            icon={LockIcon}
             type="password"
             autoComplete="new-password"
             error={errors.password?.message}
-            hint="At least 8 characters, including a letter and a number."
+            hint={<PasswordRules value={passwordValue ?? ""} />}
             {...form.register("password")}
           />
           <FormError message={errors.root?.message} />

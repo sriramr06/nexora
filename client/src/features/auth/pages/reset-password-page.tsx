@@ -1,4 +1,5 @@
-import { useForm } from "react-hook-form";
+import { LockIcon } from "lucide-react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { z } from "zod";
@@ -14,7 +15,7 @@ import {
 import { clearSession } from "@/lib/api";
 import { applyServerErrors } from "@/lib/form-errors";
 import { authApi } from "../auth-api";
-import { Field, FormError, SubmitButton } from "../components/form-parts";
+import { Field, FormError, PasswordRules, SubmitButton } from "../components/form-parts";
 
 const formSchema = z
   .object({ password: passwordSchema, confirmPassword: z.string() })
@@ -32,6 +33,7 @@ export function ResetPasswordPage() {
     defaultValues: { password: "", confirmPassword: "" },
   });
   const { errors, isSubmitting } = form.formState;
+  const passwordValue = useWatch({ control: form.control, name: "password" });
 
   const onSubmit = form.handleSubmit(async ({ password }) => {
     try {
@@ -69,14 +71,16 @@ export function ResetPasswordPage() {
         <CardContent className="grid gap-4">
           <Field
             label="New password"
+            icon={LockIcon}
             type="password"
             autoComplete="new-password"
             error={errors.password?.message}
-            hint="At least 8 characters, including a letter and a number."
+            hint={<PasswordRules value={passwordValue ?? ""} />}
             {...form.register("password")}
           />
           <Field
             label="Confirm new password"
+            icon={LockIcon}
             type="password"
             autoComplete="new-password"
             error={errors.confirmPassword?.message}
