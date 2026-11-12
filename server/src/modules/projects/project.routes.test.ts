@@ -178,7 +178,9 @@ describe("archive, restore, delete (FR-PROJ-06, 07, R7)", () => {
     const project = await createProject(arun);
     await as(arun).post(`${projects()}/${project.id}/archive`);
 
-    expect((await as(arun).patch(`${projects()}/${project.id}`, { name: "Website X" })).status).toBe(403);
+    expect(
+      (await as(arun).patch(`${projects()}/${project.id}`, { name: "Website X" })).status,
+    ).toBe(403);
     expect(
       (await as(arun).post(`/api/v1/orgs/${orgId}/projects/${project.id}/tasks`, { title: "T" }))
         .status,

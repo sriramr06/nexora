@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, NavLink, Outlet, useOutletContext, useParams } from "react-router";
-import { can, type Action, type Organization, type OrgRole } from "@nexora/shared";
+import { can, type Action, type Actor, type Organization, type OrgRole } from "@nexora/shared";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toApiError } from "@/lib/api-error";
@@ -14,6 +14,8 @@ export interface OrgContext {
   role: OrgRole;
   // can() bound to the current member, for hiding UI (the server still enforces).
   allows: (action: Action) => boolean;
+  // The current member, for can() checks that need facts (project, task).
+  actor: Actor;
 }
 
 export const useOrg = () => useOutletContext<OrgContext>();
@@ -64,6 +66,7 @@ export function OrgGate() {
   const context: OrgContext = {
     organization,
     role,
+    actor: { userId: user.id, role },
     allows: (action) =>
       (can as (a: { userId: string; role: OrgRole }, x: Action) => boolean)(
         { userId: user.id, role },
@@ -87,6 +90,8 @@ const tabClass = ({ isActive }: { isActive: boolean }) =>
 function OrgNav({ orgId, allows }: { orgId: string; allows: OrgContext["allows"] }) {
   const tabs = [
     { to: `/o/${orgId}`, label: "Overview", end: true, show: true },
+    { to: `/o/${orgId}/projects`, label: "Projects", end: false, show: true },
+    { to: `/o/${orgId}/my-tasks`, label: "My tasks", end: false, show: true },
     { to: `/o/${orgId}/members`, label: "Members", end: false, show: allows("member.view") },
     {
       to: `/o/${orgId}/invitations`,

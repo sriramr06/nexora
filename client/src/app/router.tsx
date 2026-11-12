@@ -10,6 +10,10 @@ import { AcceptInvitationPage } from "@/features/members/pages/accept-invitation
 import { InvitationsPage } from "@/features/members/pages/invitations-page";
 import { MembersPage } from "@/features/members/pages/members-page";
 import { OrgGate } from "@/features/organizations/org-gate";
+import { MyTasksPage } from "@/features/projects/pages/my-tasks-page";
+import { ProjectPage } from "@/features/projects/pages/project-page";
+import { ProjectsPage } from "@/features/projects/pages/projects-page";
+import { TaskRoute } from "@/features/projects/pages/task-route";
 import { NewOrganizationPage } from "@/features/organizations/pages/new-organization-page";
 import { OrgHomePage } from "@/features/organizations/pages/org-home-page";
 import { OrgSettingsPage } from "@/features/organizations/pages/org-settings-page";
@@ -81,6 +85,10 @@ export const router = createBrowserRouter([
                 element: <OrgGate />,
                 children: [
                   { index: true, element: <OrgHomePage /> },
+                  { path: "projects", element: <ProjectsPage /> },
+                  { path: "projects/:projectId", element: <ProjectPage /> },
+                  { path: "tasks/:taskId", element: <TaskRoute /> },
+                  { path: "my-tasks", element: <MyTasksPage /> },
                   { path: "members", element: <MembersPage /> },
                   { path: "invitations", element: <InvitationsPage /> },
                   { path: "settings", element: <OrgSettingsPage /> },

@@ -29,6 +29,7 @@ import { toApiError } from "@/lib/api-error";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/features/organizations/labels";
 import { useOrg } from "@/features/organizations/org-gate";
+import { useProjects } from "@/features/projects/projects-api";
 import {
   useBulkInvite,
   useInvitations,
@@ -59,6 +60,13 @@ const parseEmails = (text: string) =>
     .filter(Boolean);
 
 function InviteForm({ orgId, canInviteAnyRole }: { orgId: string; canInviteAnyRole: boolean }) {
+  const { actor } = useOrg();
+  const projects = useProjects(orgId, "active");
+  // R11: admins may pre-select any project; Project Managers only the ones they manage.
+  const selectable = (projects.data?.data ?? []).filter(
+    (p) => canInviteAnyRole || p.manager?.id === actor.userId,
+  );
+  const [projectIds, setProjectIds] = useState<string[]>([]);
   const [text, setText] = useState("");
   const [role, setRole] = useState<OrgRole>("member");
   const [error, setError] = useState<string>();
@@ -79,10 +87,11 @@ function InviteForm({ orgId, canInviteAnyRole }: { orgId: string; canInviteAnyRo
 
     if (emails.length === 1) {
       single.mutate(
-        { email: emails[0]!, role },
+        { email: emails[0]!, role, projectIds },
         {
           onSuccess: ({ invitation, emailSent }) => {
             setText("");
+            setProjectIds([]);
             if (emailSent) toast.success(`Invitation sent to ${invitation.email}.`);
             else toast.warning(`Invitation created, but the email failed. Use Resend.`);
           },
@@ -91,11 +100,12 @@ function InviteForm({ orgId, canInviteAnyRole }: { orgId: string; canInviteAnyRo
       );
     } else {
       bulk.mutate(
-        { emails, role },
+        { emails, role, projectIds },
         {
           onSuccess: (r) => {
             setResults(r);
             setText("");
+            setProjectIds([]);
           },
           onError: (err) => setError(toApiError(err).message),
         },
@@ -152,6 +162,28 @@ function InviteForm({ orgId, canInviteAnyRole }: { orgId: string; canInviteAnyRo
               )}
             </div>
           </div>
+          {selectable.length > 0 && (
+            <fieldset className="grid gap-1.5">
+              <legend className="mb-1.5 text-sm font-medium">Add to projects (optional)</legend>
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                {selectable.map((p) => (
+                  <label key={p.id} className="flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      className="size-4 accent-primary"
+                      checked={projectIds.includes(p.id)}
+                      onChange={(e) =>
+                        setProjectIds((ids) =>
+                          e.target.checked ? [...ids, p.id] : ids.filter((id) => id !== p.id),
+                        )
+                      }
+                    />
+                    {p.name}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
           {error && <p className="text-sm text-destructive">{error}</p>}
           <div>
             <Button type="submit" disabled={pending}>
@@ -252,8 +284,13 @@ export function InvitationsPage() {
                 const open = inv.status === "pending" || inv.status === "expired";
                 return (
                   <TableRow key={inv.id}>
-                    <TableCell className="max-w-48 truncate pl-4 font-medium">
-                      {inv.email}
+                    <TableCell className="max-w-56 pl-4">
+                      <span className="block truncate font-medium">{inv.email}</span>
+                      {inv.projects.length > 0 && (
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {inv.projects.map((p) => p.name).join(", ")}
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="gap-1.5 font-normal">
