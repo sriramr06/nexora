@@ -13,6 +13,7 @@ import { withTransaction } from "../../common/db/transaction";
 import type { AuthUser } from "../../common/middleware/authenticate";
 import type { TenantContext } from "../../common/middleware/tenancy";
 import { ActivityModel } from "../activity/activity.model";
+import { CommentModel } from "../comments/comment.model";
 import { recordActivity, type ActivityInput } from "../activity/activity.service";
 import { MembershipModel } from "../members/membership.model";
 import { TaskModel, type TaskRecord } from "../tasks/task.model";
@@ -426,6 +427,7 @@ export const deleteProject = async (tenant: TenantContext, projectId: string) =>
 
   await withTransaction(async (session) => {
     await TaskModel.deleteMany({ organizationId, projectId: project._id }, { session });
+    await CommentModel.deleteMany({ organizationId, projectId: project._id }, { session });
     await ActivityModel.deleteMany({ organizationId, projectId: project._id }, { session });
     await ProjectModel.deleteOne({ organizationId, _id: project._id }, { session });
   });

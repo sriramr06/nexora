@@ -1,7 +1,12 @@
 import { Router } from "express";
 import {
   activityQuerySchema,
+  boardQuerySchema,
+  changeStatusSchema,
   createTaskSchema,
+  requestChangesSchema,
+  setFlagSchema,
+  versionOnlySchema,
   myTasksQuerySchema,
   setAssigneeSchema,
   updateTaskSchema,
@@ -11,6 +16,7 @@ import { sendCreated, sendData, sendList, sendNoContent } from "../../common/htt
 import { currentUser } from "../../common/middleware/authenticate";
 import { currentTenant, tenant } from "../../common/middleware/tenancy";
 import { validate } from "../../common/middleware/validate";
+import * as workflow from "./task-workflow.service";
 import * as tasks from "./task.service";
 
 // /api/v1/orgs/:orgId/... task routes (API design §8.9). Permissions need the task's
@@ -40,6 +46,65 @@ export const createTaskRouter = (): Router => {
       );
     },
   );
+
+  // ---------- board (FR-BOARD) and summary (FR-PROJ-08) ----------
+  router.get(
+    "/projects/:projectId/board",
+    validate({ query: boardQuerySchema }),
+    async (req, res) => {
+      const filters = res.locals.query as z.output<typeof boardQuerySchema>;
+      sendData(
+        res,
+        await workflow.projectBoard(currentTenant(req), String(req.params.projectId), filters),
+      );
+    },
+  );
+
+  router.get("/projects/:projectId/summary", async (req, res) => {
+    sendData(res, await workflow.projectSummary(currentTenant(req), String(req.params.projectId)));
+  });
+
+  router.get("/projects/:projectId/blocked-tasks", async (req, res) => {
+    sendData(res, await workflow.blockedTasks(currentTenant(req), String(req.params.projectId)));
+  });
+
+  // ---------- workflow (R14 – R16) ----------
+  router.post("/tasks/:taskId/status", validate({ body: changeStatusSchema }), async (req, res) => {
+    sendData(
+      res,
+      await workflow.changeStatus(currentTenant(req), currentUser(req), taskId(req), req.body),
+    );
+  });
+
+  router.post(
+    "/tasks/:taskId/request-changes",
+    validate({ body: requestChangesSchema }),
+    async (req, res) => {
+      sendData(
+        res,
+        await workflow.requestChangesOn(
+          currentTenant(req),
+          currentUser(req),
+          taskId(req),
+          req.body,
+        ),
+      );
+    },
+  );
+
+  router.put("/tasks/:taskId/flag", validate({ body: setFlagSchema }), async (req, res) => {
+    sendData(
+      res,
+      await workflow.flagTask(currentTenant(req), currentUser(req), taskId(req), req.body),
+    );
+  });
+
+  router.delete("/tasks/:taskId/flag", validate({ body: versionOnlySchema }), async (req, res) => {
+    sendData(
+      res,
+      await workflow.unflagTask(currentTenant(req), currentUser(req), taskId(req), req.body),
+    );
+  });
 
   router.get("/my-tasks", validate({ query: myTasksQuerySchema }), async (req, res) => {
     const { items, pagination } = await tasks.myTasks(

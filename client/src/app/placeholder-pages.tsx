@@ -35,3 +35,24 @@ export function NotFoundPage() {
     </main>
   );
 }
+
+// Router error boundary: a friendly page instead of React Router's developer screen.
+export function ErrorPage() {
+  return (
+    <main className="flex min-h-svh flex-col items-center justify-center gap-3 p-4 text-center">
+      <h1 className="text-2xl font-semibold">Something went wrong</h1>
+      <p className="max-w-sm text-sm text-muted-foreground">
+        An unexpected error stopped this page. Reload to try again; if it keeps happening, go back
+        home.
+      </p>
+      <div className="flex gap-3 text-sm">
+        <button className="underline underline-offset-4" onClick={() => window.location.reload()}>
+          Reload
+        </button>
+        <a href="/" className="underline underline-offset-4">
+          Go home
+        </a>
+      </div>
+    </main>
+  );
+}
