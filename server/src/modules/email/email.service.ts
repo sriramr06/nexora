@@ -1,6 +1,7 @@
 import nodemailer, { type Transporter } from "nodemailer";
 import { env } from "../../config/env";
 import { logger } from "../../common/logger";
+import { GmailApiEmailService } from "./gmail-api";
 
 export interface EmailMessage {
   to: string;
@@ -27,6 +28,12 @@ export class ConsoleEmailService implements EmailService {
   }
 }
 
+export const SMTP_TIMEOUTS = {
+  connectionTimeout: 10_000, // TCP connect
+  greetingTimeout: 10_000, // server greeting after connect
+  socketTimeout: 20_000, // inactivity during the session
+} as const;
+
 export class SmtpEmailService implements EmailService {
   private transporter: Transporter;
 
@@ -39,6 +46,9 @@ export class SmtpEmailService implements EmailService {
         user: env.SMTP_USER,
         pass: env.SMTP_PASS,
       },
+      // Fail fast: nodemailer's defaults wait up to minutes (socket: 10 min) when the
+      // SMTP port is unreachable, which left registration spinning in production.
+      ...SMTP_TIMEOUTS,
     });
   }
 
@@ -51,7 +61,19 @@ export class SmtpEmailService implements EmailService {
 }
 
 const createEmailService = (): EmailService => {
-  return env.EMAIL_TRANSPORT === "smtp" ? new SmtpEmailService() : new ConsoleEmailService();
+  switch (env.EMAIL_TRANSPORT) {
+    case "smtp":
+      return new SmtpEmailService();
+    case "gmail_api":
+      return new GmailApiEmailService({
+        clientId: env.GMAIL_CLIENT_ID!,
+        clientSecret: env.GMAIL_CLIENT_SECRET!,
+        refreshToken: env.GMAIL_REFRESH_TOKEN!,
+        from: env.EMAIL_FROM,
+      });
+    default:
+      return new ConsoleEmailService();
+  }
 };
 
 let current: EmailService = createEmailService();

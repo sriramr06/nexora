@@ -31,6 +31,8 @@ export function createApp() {
       status: databaseUp ? "ok" : "degraded",
       database: databaseUp ? "up" : "down",
       timestamp: new Date().toISOString(),
+      // Render sets RENDER_GIT_COMMIT to the deployed commit.
+      version: process.env.RENDER_GIT_COMMIT ?? "dev",
     };
     sendData(res, health, databaseUp ? 200 : 503);
   });

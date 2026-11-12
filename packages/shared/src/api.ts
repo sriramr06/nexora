@@ -8,6 +8,9 @@ export const healthResponseSchema = z.object({
     status: z.enum(["ok", "degraded"]),
     database: z.enum(["up", "down"]),
     timestamp: z.iso.datetime(),
+    // Git commit of the running build ("dev" locally). CI waits for the merged commit
+    // to appear here, so a deploy that fails to start turns the pipeline red.
+    version: z.string(),
   }),
 });
 

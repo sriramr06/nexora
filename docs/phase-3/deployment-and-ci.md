@@ -16,7 +16,7 @@ Define the environments, hosting, continuous integration, deployment process and
 |---|---|
 | DEP-1 | Three environments: **local**, **CI / test** and **production**. No staging environment. |
 | DEP-2 | Separate MongoDB Atlas free (M0) clusters for **development** and **production**, in separate Atlas projects. |
-| DEP-3 | Frontend on **Vercel**; API on **Render**; both reached through the Vercel domain via the `/api` rewrite (AU-12). |
+| DEP-3 | Frontend on **Vercel**; API on **Render (free instance)**; both reached through the Vercel domain via the `/api` rewrite (AU-12). Free instances block outbound SMTP, so email uses the Gmail API over HTTPS (INT-1). |
 | DEP-4 | Region: **Render Singapore** and **Atlas AWS Singapore**, co-located to minimise database latency. |
 | DEP-5 | Vercel preview deployments are **disabled** (previews would proxy to the production API). |
 | DEP-6 | Auto-deploy is **disabled** on Vercel and Render. GitHub Actions deploys only after all CI checks pass. |
@@ -24,6 +24,7 @@ Define the environments, hosting, continuous integration, deployment process and
 | DEP-8 | End-to-end tests run on `main` only; all other checks run on every push and pull request. |
 | DEP-9 | Production indexes are managed by an explicit script; Mongoose `autoIndex` is disabled in production. |
 | DEP-10 | Backups are taken manually with a `db:backup` script (`mongodump`) before risky deployments; the free tier provides no automated backups. |
+| DEP-11 | Every deployment is **verified**: CI waits until `/api/v1/health` reports the merged commit (`version` = `RENDER_GIT_COMMIT`) and fails after 10 minutes otherwise (added 12 Nov 2026). |
 
 ## 3. Architecture
 
@@ -36,7 +37,7 @@ GitHub (main) ──► GitHub Actions: lint → typecheck → test → build
               nexora-six-rouge.vercel.app            nexora-5crt.onrender.com
               /api/* ── rewrite ─────────► /api/*
                                                  │
-                              MongoDB Atlas (prod) · Cloudinary · Brevo SMTP
+                              MongoDB Atlas (prod) · Cloudinary · Gmail API
 ```
 
 ## 4. Environments
@@ -46,7 +47,7 @@ GitHub (main) ──► GitHub Actions: lint → typecheck → test → build
 | Client | Vite dev server (proxies `/api` to the local API) | — | Vercel |
 | API | `npm run dev` | In-process (Supertest) | Render web service |
 | Database | Atlas dev cluster | mongodb-memory-server replica set | Atlas prod cluster |
-| Email | `ConsoleEmailService` | `FakeEmailService` | `SmtpEmailService` (Brevo) |
+| Email | `ConsoleEmailService` | `FakeEmailService` | `GmailApiEmailService` (HTTPS) |
 | Cloudinary folder | `nexora/development` | Mocked | `nexora/production` |
 
 **Database tools:** MongoDB Compass may be used to inspect the dev cluster. Data is changed only through the application or seed scripts, never edited manually, to avoid bypassing business rules, activity and notifications. Production access through Compass uses a **read-only** database user.
@@ -74,12 +75,13 @@ GitHub (main) ──► GitHub Actions: lint → typecheck → test → build
 - Web service, Singapore region; build command builds `packages/shared` then `server`.
 - Health check path: `/api/v1/health`.
 - Express `trust proxy` enabled (real client IP from `X-Forwarded-For`).
-- Free-tier instances sleep when idle; the first request afterwards can take up to about a minute. Before demos, open the site in advance.
+- Free instance: sleeps when idle (the first request afterwards can take up to about a minute — open the site before demos) and blocks outbound SMTP ports, hence the Gmail API (INT-1).
+- `RENDER_GIT_COMMIT` (set by Render) is reported as `version` by `/api/v1/health` for deployment verification (DEP-11).
 
 ### 5.3 MongoDB Atlas
 
 - M0 free clusters (replica sets — transactions supported) for dev and prod.
-- Network access: Render free instances do not have fixed outbound IPs, so the production cluster allows all IPs and relies on a strong, unique database password and a least-privilege application user.
+- Network access: Render instances do not have fixed outbound IPs, so the production cluster allows all IPs and relies on a strong, unique database password and a least-privilege application user.
 - Database users: application user (read / write on the Nexora database only); read-only user for inspection.
 
 ## 6. Continuous Integration (GitHub Actions)
@@ -102,6 +104,7 @@ GitHub (main) ──► GitHub Actions: lint → typecheck → test → build
    1. `db:sync-indexes` runs against production.
    2. The Render **deploy hook** (stored as a GitHub secret) triggers the API deployment.
    3. The **Vercel CLI** (token stored as a GitHub secret) deploys the client.
+   4. CI polls `/api/v1/health` through the Vercel domain until it reports the merged commit (DEP-11); otherwise the run fails and the Render logs are checked.
 4. If any check fails, nothing is deployed.
 
 ## 8. Scripts

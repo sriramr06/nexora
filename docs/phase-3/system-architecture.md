@@ -33,7 +33,7 @@ Express API (Node.js, TypeScript) — modular monolith
    │
    ├──► MongoDB Atlas (replica set; transactions)
    ├──► Cloudinary (avatars)
-   └──► SMTP provider (Brevo) (verification, reset, invitations, approval emails)
+   └──► Gmail API over HTTPS (verification, reset, invitations, approval emails)
 ```
 
 ## 4. Repository Structure

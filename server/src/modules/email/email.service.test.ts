@@ -34,3 +34,12 @@ describe("email service", () => {
     await expect(fake.send(message)).rejects.toThrow("Simulated email failure");
   });
 });
+
+describe("SMTP timeouts", () => {
+  it("fails fast instead of hanging when the SMTP server is unreachable", async () => {
+    const { SMTP_TIMEOUTS } = await import("./email.service");
+    expect(SMTP_TIMEOUTS.connectionTimeout).toBeLessThanOrEqual(10_000);
+    expect(SMTP_TIMEOUTS.greetingTimeout).toBeLessThanOrEqual(10_000);
+    expect(SMTP_TIMEOUTS.socketTimeout).toBeLessThanOrEqual(30_000);
+  });
+});
