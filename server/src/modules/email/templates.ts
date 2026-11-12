@@ -69,3 +69,86 @@ export const passwordResetEmail = (name: string, link: string): EmailContent => 
       <p>This link expires in 1 hour.</p>
       <p>If you didn't request this, you can ignore this email.</p>`),
 });
+
+// Plain frontend link without a token, e.g. appUrl("/o/123").
+export const appUrl = (path: string): string => `${env.APP_URL}${path}`;
+
+// ---------- organization lifecycle (FR-ORG-08, FR-ORG-10) ----------
+
+export const organizationApprovedEmail = (
+  name: string,
+  orgName: string,
+  link: string,
+): EmailContent => ({
+  subject: `${orgName} is approved on Nexora`,
+  text: [
+    `Hi ${name},`,
+    "",
+    `Good news: ${orgName} has been approved. You can now create projects and invite your team:`,
+    link,
+  ].join("\n"),
+  html: layout(`
+      <p>Hi ${escapeHtml(name)},</p>
+      <p>Good news: <strong>${escapeHtml(orgName)}</strong> has been approved. You can now create projects and invite your team.</p>
+      ${button(link, "Open Nexora")}`),
+});
+
+export const organizationRejectedEmail = (
+  name: string,
+  orgName: string,
+  reason: string,
+  link: string,
+): EmailContent => ({
+  subject: `${orgName} needs changes before approval`,
+  text: [
+    `Hi ${name},`,
+    "",
+    `${orgName} was not approved. Reason:`,
+    reason,
+    "",
+    "You can update the details and resubmit:",
+    link,
+  ].join("\n"),
+  html: layout(`
+      <p>Hi ${escapeHtml(name)},</p>
+      <p><strong>${escapeHtml(orgName)}</strong> was not approved. Reason:</p>
+      <blockquote style="margin: 0; padding-left: 12px; border-left: 3px solid #e2e8f0;">${escapeHtml(reason)}</blockquote>
+      <p>You can update the details and resubmit.</p>
+      ${button(link, "Review and resubmit")}`),
+});
+
+export const organizationSuspendedEmail = (
+  name: string,
+  orgName: string,
+  reason: string,
+): EmailContent => ({
+  subject: `${orgName} has been suspended`,
+  text: [
+    `Hi ${name},`,
+    "",
+    `${orgName} has been suspended on Nexora, so its members cannot access projects for now. Reason:`,
+    reason,
+  ].join("\n"),
+  html: layout(`
+      <p>Hi ${escapeHtml(name)},</p>
+      <p><strong>${escapeHtml(orgName)}</strong> has been suspended on Nexora, so its members cannot access projects for now. Reason:</p>
+      <blockquote style="margin: 0; padding-left: 12px; border-left: 3px solid #e2e8f0;">${escapeHtml(reason)}</blockquote>`),
+});
+
+export const organizationReactivatedEmail = (
+  name: string,
+  orgName: string,
+  link: string,
+): EmailContent => ({
+  subject: `${orgName} is active again`,
+  text: [
+    `Hi ${name},`,
+    "",
+    `${orgName} has been reactivated. Your team has access again:`,
+    link,
+  ].join("\n"),
+  html: layout(`
+      <p>Hi ${escapeHtml(name)},</p>
+      <p><strong>${escapeHtml(orgName)}</strong> has been reactivated. Your team has access again.</p>
+      ${button(link, "Open Nexora")}`),
+});
