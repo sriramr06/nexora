@@ -87,3 +87,21 @@ jobs:
           npx --yes vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
           npx --yes vercel@latest build --prod --token="$VERCEL_TOKEN"
           npx --yes vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+
+      # The deploy hook only *requests* a deploy. If the new version fails to start
+      # (e.g. env validation), Render keeps serving the old one and nothing fails.
+      # So wait until production reports this exact commit, through the Vercel proxy.
+      - name: Verify API deployment
+        run: |
+          url="https://nexora-six-rouge.vercel.app/api/v1/health"
+          for attempt in $(seq 1 40); do
+            version=$(curl --silent --max-time 10 "$url" | jq -r '.data.version // empty' || true)
+            echo "Attempt $attempt: production reports '${version:-unreachable}', expecting $GITHUB_SHA"
+            if [ "$version" = "$GITHUB_SHA" ]; then
+              echo "Production is running $GITHUB_SHA"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::Production did not start $GITHUB_SHA within 10 minutes. Check the Render logs (failed build or env validation)."
+          exit 1

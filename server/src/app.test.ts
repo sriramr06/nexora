@@ -21,7 +21,7 @@ describe("GET /api/v1/health", () => {
       const res = await request(createApp()).get("/api/v1/health");
 
       expect(res.status).toBe(200);
-      expect(res.body.data).toMatchObject({ status: "ok", database: "up" });
+      expect(res.body.data).toMatchObject({ status: "ok", database: "up", version: "dev" });
       expect(healthResponseSchema.safeParse(res.body).success).toBe(true);
     });
   });
