@@ -1,24 +1,21 @@
-import { Link, NavLink, Outlet } from "react-router";
+import { NavLink, Outlet } from "react-router";
 import { LogOutIcon, MailWarningIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useCurrentUser } from "@/lib/auth-store";
 import { useLogout } from "@/features/auth/auth-api";
 import { ResendVerificationButton } from "@/features/auth/components/resend-verification-button";
 
-function Logo() {
-  return (
-    <Link to="/" className="text-lg font-semibold tracking-tight">
-      Nexora
-    </Link>
-  );
-}
-
 // Centered card for login, register and the email-link pages.
 export function AuthLayout() {
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted/40 p-4">
+    <main className="relative flex min-h-svh flex-col items-center justify-center gap-6 bg-muted/40 p-4">
+      <div className="absolute top-3 right-3">
+        <ThemeToggle />
+      </div>
       <Logo />
       <Card className="w-full max-w-sm">
         <Outlet />
@@ -45,8 +42,9 @@ export function AppLayout() {
               Account
             </NavLink>
           </nav>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2">
             <span className="hidden text-sm text-muted-foreground sm:inline">{user.name}</span>
+            <ThemeToggle />
             <Button
               variant="ghost"
               size="sm"
