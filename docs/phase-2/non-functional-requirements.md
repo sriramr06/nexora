@@ -21,7 +21,7 @@ Selected by the Project Owner. Detailed architecture is defined in Phase 3 — S
 | Backend | Node.js with Express, REST API |
 | Database | MongoDB (replica set, e.g. MongoDB Atlas) |
 | Authentication | JWT (access and refresh tokens) |
-| Media storage | Cloudinary (avatars only) |
+| Media storage | MongoDB `avatars` collection (resized avatars only) |
 | Email | Transactional email provider with a free tier (selected in Phase 3) |
 
 ## 3. Security (SEC)
@@ -73,7 +73,7 @@ Targets under normal load on the selected free/low-cost hosting, excluding cold 
 | NFR-REL-02 | The API shall return errors in one consistent format: HTTP status, machine-readable code, message and optional field errors. |
 | NFR-REL-03 | Unexpected errors shall return a generic 500 response without stack traces or internal details. |
 | NFR-REL-04 | The API shall expose a health-check endpoint. |
-| NFR-REL-05 | Failure of non-critical external services (email, Cloudinary) shall not corrupt data; the user shall see a clear error and be able to retry. |
+| NFR-REL-05 | Failure of non-critical external services (email) shall not corrupt data; the user shall see a clear error and be able to retry. |
 | NFR-REL-06 | All timestamps shall be stored in UTC. |
 
 ## 7. Usability and Accessibility (USE)

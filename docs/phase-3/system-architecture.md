@@ -32,7 +32,6 @@ Express API (Node.js, TypeScript) — modular monolith
    ├── Modules (routes → controllers → services → repositories)
    │
    ├──► MongoDB Atlas (replica set; transactions)
-   ├──► Cloudinary (avatars)
    └──► Gmail API over HTTPS (verification, reset, invitations, approval emails)
 ```
 

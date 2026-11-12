@@ -43,7 +43,7 @@ Approved by the Project Owner during Phase 2 — Requirements Engineering:
 - Organization registration form submitted for Application Owner approval.
 - Email-bound member invitations.
 - Transactional email: email verification, invitations and password reset.
-- User profile avatars stored via Cloudinary.
+- User profile avatars stored (resized) in MongoDB (Cloudinary planned originally; changed 12 Nov 2026).
 
 ## 4. Out of Scope
 

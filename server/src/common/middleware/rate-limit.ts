@@ -22,6 +22,10 @@ const common = {
 
 // API design §9. A factory, so every createApp() (e.g. each test) gets fresh counters.
 // In-memory store: fine for one Render instance; a shared store is needed to scale out.
+// Public invitation endpoints (API design §9): 20 per 15 minutes per IP.
+export const createInvitationRateLimiter = () =>
+  rateLimit({ ...common, windowMs: 15 * MINUTE, limit: 20 });
+
 export const createAuthRateLimiters = () => ({
   login: rateLimit({
     ...common,

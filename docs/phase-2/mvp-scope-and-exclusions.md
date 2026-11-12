@@ -23,7 +23,7 @@ Anything not listed as in scope is excluded from the MVP by default.
 | D5 | Tenant Admin count | An organization has **one or more** Tenant Admins and must always have at least one |
 | D6 | Task assignment | Single assignee per task; Team Members may only self-assign |
 | D7 | Task transfer | Direct reassignment by Project Manager / Tenant Admin only; transfer requests are a future enhancement |
-| D8 | File storage | Cloudinary is used **only for user avatars** |
+| D8 | File storage | Only user avatars are stored, resized, in MongoDB (Cloudinary dropped 12 Nov 2026) |
 | D9 | Application Owner data access | The Application Owner manages organizations but **cannot access tenant content** (projects, tasks, comments) |
 | D10 | Team Lead role | Not a separate role in the MVP. Team leads use the Project Manager or Team Member role; a project-level Lead role is a future enhancement |
 | D11 | Blocked / On hold | Modeled as a **flag** on the task, not as extra statuses. Flagged tasks stay in their board column with a badge; a "Blocked tasks" dialog lists them per project |
@@ -41,7 +41,7 @@ Anything not listed as in scope is excluded from the MVP by default.
 
 ### 3.2 User Profile
 - Update display name.
-- Upload, replace and remove avatar (Cloudinary).
+- Upload, replace and remove avatar (stored in MongoDB).
 
 ### 3.3 Organization (Tenant) Management
 - Organization registration form.

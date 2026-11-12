@@ -8,10 +8,13 @@ import { errorHandler } from "./common/middleware/error-handler";
 import { isDbConnected } from "./common/db/connection";
 import { sendData } from "./common/http/respond";
 import { createAuthRouter } from "./modules/auth/auth.routes";
+import { createOrganizationRouter } from "./modules/organizations/organization.routes";
+import { createMemberRouter } from "./modules/members/member.routes";
 import {
-  createMeRouter,
-  createOrganizationRouter,
-} from "./modules/organizations/organization.routes";
+  createPublicInvitationRouter,
+  createTenantInvitationRouter,
+} from "./modules/invitations/invitation.routes";
+import { createMeRouter, createUserRouter } from "./modules/users/me.routes";
 import { createPlatformRouter } from "./modules/platform/platform.routes";
 
 // Creates the Express application without starting a server,
@@ -39,7 +42,11 @@ export function createApp() {
 
   app.use(`${API_PREFIX}/auth`, createAuthRouter());
   app.use(`${API_PREFIX}/me`, createMeRouter());
+  app.use(`${API_PREFIX}/users`, createUserRouter());
+  app.use(`${API_PREFIX}/invitations`, createPublicInvitationRouter());
   app.use(`${API_PREFIX}/orgs`, createOrganizationRouter());
+  app.use(`${API_PREFIX}/orgs/:orgId`, createMemberRouter());
+  app.use(`${API_PREFIX}/orgs/:orgId/invitations`, createTenantInvitationRouter());
   app.use(`${API_PREFIX}/platform`, createPlatformRouter());
 
   app.use(notFound);
