@@ -44,7 +44,9 @@ describe("UserModel", () => {
   });
 
   it("rejects an unknown platform role", async () => {
-    await expect(UserModel.create({ ...validUser, platformRole: "admin" })).rejects.toThrow();
+    // Cast: the invalid value is the point of this test.
+    const invalid = { ...validUser, platformRole: "admin" as unknown as "owner" };
+    await expect(UserModel.create(invalid)).rejects.toThrow();
   });
 
   it("does not load passwordHash unless explicitly selected", async () => {

@@ -63,7 +63,7 @@ Unverified users can log in but cannot register an organization (FR-AUTH-05).
    - Not found, revoked, past `expiresAt` or past `familyExpiresAt` → 401 and clear the cookie.
    - Replaced **more than** 10 seconds ago → revoke the family, 401, clear the cookie.
    - Replaced **within** 10 seconds → 401 without revocation; the client retries with the current cookie.
-   - Valid → set `replacedAt`, issue a new token in the same family (new `expiresAt`, same `familyExpiresAt`), set the cookie, return a new access token.
+   - Valid → set `replacedAt`, issue a new token in the same family (new `expiresAt`, same `familyExpiresAt`), set the cookie, return a new access token and the user profile (so page load needs one request, §4.5).
 3. The client retries the original request.
 
 **Client rule:** only one refresh request is in flight per tab; other requests wait for its result.

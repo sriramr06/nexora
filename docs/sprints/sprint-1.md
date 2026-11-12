@@ -43,13 +43,13 @@
 
 ## Authentication Stories
 
-- [ ] US-01 Register an account
-- [ ] US-02 Verify my email
-- [ ] US-03 Log in and out (refresh rotation, families, grace period)
-- [ ] US-04 Reset a forgotten password
-- [ ] US-05 Change my password
-- [ ] Email service: console, fake, SMTP
-- [ ] Rate limiting on auth endpoints
+- [x] US-01 Register an account (backend)
+- [x] US-02 Verify my email (backend)
+- [x] US-03 Log in and out (refresh rotation, families, grace period) (backend)
+- [x] US-04 Reset a forgotten password (backend)
+- [x] US-05 Change my password (backend)
+- [x] Email service: console, fake, SMTP
+- [x] Rate limiting on auth endpoints
 - [ ] Client: auth pages, single-flight refresh interceptor, session restore, `RequireAuth`, `RequireVerified`
 
 ## Review (end of sprint)

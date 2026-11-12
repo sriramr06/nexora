@@ -60,7 +60,8 @@ const userSchema = new Schema(
     timestamps: true,
 
     toJSON: {
-      transform: (_doc, ret) => {
+      // Explicit parameter types: untyped ones make Mongoose infer every field as unknown.
+      transform: (_doc: unknown, ret: Record<string, unknown>) => {
         const { _id, __v: _version, passwordHash: _passwordHash, ...rest } = ret;
         return { id: String(_id), ...rest };
       },

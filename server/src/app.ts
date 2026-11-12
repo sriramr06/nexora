@@ -7,6 +7,7 @@ import { notFound } from "./common/middleware/not-found";
 import { errorHandler } from "./common/middleware/error-handler";
 import { isDbConnected } from "./common/db/connection";
 import { sendData } from "./common/http/respond";
+import { createAuthRouter } from "./modules/auth/auth.routes";
 
 // Creates the Express application without starting a server,
 // so tests can use it directly with Supertest.
@@ -28,6 +29,8 @@ export function createApp() {
     };
     sendData(res, health, databaseUp ? 200 : 503);
   });
+
+  app.use(`${API_PREFIX}/auth`, createAuthRouter());
 
   app.use(notFound);
   app.use(errorHandler);
