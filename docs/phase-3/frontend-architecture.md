@@ -20,7 +20,7 @@ Define the structure of the React client: state management, routing, API access,
 | FE-4 | Routing | React Router | Nested routes and route guards |
 | FE-5 | HTTP client | **axios** with interceptors | Central auth header, single-flight token refresh and retry |
 | FE-6 | Forms | **React Hook Form + Zod** | Same Zod schemas as the server, from `packages/shared` |
-| FE-7 | UI components | **shadcn/ui** (Radix + Tailwind) | Accessible dialogs, menus and popovers; source owned in the repo; MIT licence |
+| FE-7 | UI components | **shadcn/ui** (Base UI + Tailwind; theme in `ui-theme.md`) | Accessible dialogs, menus and popovers; source owned in the repo; MIT licence |
 | FE-8 | Drag and drop | **dnd-kit** | Maintained; keyboard dragging support (NFR-USE-02) |
 | FE-9 | Permissions | Shared `can()` function in `packages/shared` | Backend and frontend use the same permission rules |
 | FE-10 | Folder structure | Feature-based | Mirrors backend modules; related code stays together |
@@ -53,7 +53,7 @@ A keyboard / menu alternative ("Move to…") performs the same mutation.
 |---|---|---|
 | `/login`, `/register`, `/forgot-password` | Public | Auth pages |
 | `/verify-email?token=`, `/reset-password?token=`, `/invite?token=` | Public | Token pages (token sent to the API in the body) |
-| `/` | User | Redirects to the last used organization or `/welcome` |
+| `/` | Public / User | Landing page for visitors (UI-6); logged-in users go to the last used organization or `/welcome` |
 | `/welcome` | User | No memberships: register an organization or wait for an invitation |
 | `/organizations/new` | Verified | Organization registration form |
 | `/account` | User | Profile, avatar, change password |
