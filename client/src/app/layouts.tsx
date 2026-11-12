@@ -1,10 +1,11 @@
-import { NavLink, Outlet, useMatch } from "react-router";
+import { Link, NavLink, Outlet, useMatch } from "react-router";
 import { LogOutIcon, MailWarningIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserAvatar } from "@/components/user-avatar";
 import { useCurrentUser } from "@/lib/auth-store";
 import { useLogout } from "@/features/auth/auth-api";
 import { ResendVerificationButton } from "@/features/auth/components/resend-verification-button";
@@ -86,7 +87,14 @@ export function AppLayout() {
             </NavLink>
           </nav>
           <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
-            <span className="hidden text-sm text-muted-foreground sm:inline">{user.name}</span>
+            <Link
+              to="/account"
+              className="flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:text-foreground"
+              aria-label={`Account: ${user.name}`}
+            >
+              <UserAvatar name={user.name} url={user.avatar?.url} size="sm" />
+              <span className="hidden md:inline">{user.name}</span>
+            </Link>
             <ThemeToggle />
             <Button
               variant="ghost"
