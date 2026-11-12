@@ -68,6 +68,10 @@ jobs:
           APP_URL: https://nexora-six-rouge.vercel.app
           # Not used by the script, but required by env validation.
           JWT_ACCESS_SECRET: ci-placeholder-secret-not-used-for-signing
+          EMAIL_TRANSPORT: smtp
+          SMTP_HOST: placeholder.invalid
+          SMTP_USER: placeholder
+          SMTP_PASS: placeholder
 
       - name: Deploy API (Render)
         run: curl --fail --silent --show-error -X POST "$RENDER_DEPLOY_HOOK_URL"

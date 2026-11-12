@@ -6,4 +6,6 @@ export const authConfig = {
   refreshFamilyTtlMs: 30 * 24 * 60 * 60 * 1000, // 30 days absolute
   refreshReuseGraceMs: 10 * 1000, // multi-tab grace period
   bcryptCost: 12,
+  emailVerificationTtlMs: 24 * 60 * 60 * 1000, // 24 hours
+  passwordResetTtlMs: 60 * 60 * 1000, // 1 hour
 } as const;
