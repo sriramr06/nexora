@@ -10,6 +10,7 @@ import { useCurrentUser } from "@/lib/auth-store";
 import { useLogout } from "@/features/auth/auth-api";
 import { ResendVerificationButton } from "@/features/auth/components/resend-verification-button";
 import { OrgSwitcher } from "@/features/organizations/components/org-switcher";
+import { NotificationBell } from "@/features/notifications/components/notification-bell";
 
 // Decorative mini board for the brand panel.
 function BrandBoard() {
@@ -76,7 +77,7 @@ export function AppLayout() {
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4 sm:gap-4">
           <Logo compact />
           {!isOwner && <OrgSwitcher currentOrgId={orgMatch?.params.orgId} />}
-          <nav className="flex gap-4 text-sm">
+          <nav className={isOwner ? "flex gap-4 text-sm" : "hidden gap-4 text-sm sm:flex"}>
             {isOwner && (
               <NavLink to="/platform/organizations" className={navLinkClass}>
                 Organizations
@@ -95,6 +96,7 @@ export function AppLayout() {
               <UserAvatar name={user.name} url={user.avatar?.url} size="sm" />
               <span className="hidden md:inline">{user.name}</span>
             </Link>
+            {orgMatch && !isOwner && <NotificationBell orgId={orgMatch.params.orgId!} />}
             <ThemeToggle />
             <Button
               variant="ghost"

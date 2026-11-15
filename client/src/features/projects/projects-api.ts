@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   ActivityEntry,
   Board,
@@ -383,3 +383,19 @@ export const useDeleteComment = (orgId: string, taskId: string) =>
   useCommentMutation(orgId, taskId, async (id: string) =>
     api.delete(`${base(orgId)}/comments/${id}`),
   );
+
+// ---------- project activity feed (FR-ACT-04) ----------
+
+export const useProjectActivity = (orgId: string, projectId: string) =>
+  useInfiniteQuery({
+    queryKey: [...projectKeys.detail(orgId, projectId), "activity"],
+    queryFn: async ({ pageParam }) =>
+      (
+        await api.get<CursorPage<ActivityEntry>>(`${base(orgId)}/projects/${projectId}/activity`, {
+          params: { limit: 30, cursor: pageParam ?? undefined },
+        })
+      ).data,
+    initialPageParam: null as string | null,
+    getNextPageParam: (last) => last.pagination.nextCursor,
+    staleTime: 0, // always fresh when the tab opens
+  });

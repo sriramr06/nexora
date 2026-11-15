@@ -65,7 +65,26 @@ export const describeActivity = (entry: ActivityEntry): string => {
       return "cleared the flag";
     case "task.deleted":
       return "deleted the task";
-    default:
-      return entry.action.replace(".", " ").replace("_", " ");
+    // Project-level entries (project activity feed, FR-ACT-04)
+    case "project.created":
+      return "created the project";
+    case "project.archived":
+      return "archived the project";
+    case "project.restored":
+      return "restored the project";
+    case "project.member_added":
+      return `added ${name(entry, changes.member?.to)} to the project`;
+    case "project.member_removed":
+      return `removed ${name(entry, changes.member?.from)} from the project`;
+    case "project.updated":
+      return Object.entries(changes)
+        .map(([field, { to }]) =>
+          field === "managerId"
+            ? `made ${name(entry, to)} the manager`
+            : field === "name"
+              ? `renamed the project to “${String(to)}”`
+              : "updated the project description",
+        )
+        .join(", ");
   }
 };
