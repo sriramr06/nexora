@@ -12,51 +12,23 @@ import { ResendVerificationButton } from "@/features/auth/components/resend-veri
 import { OrgSwitcher } from "@/features/organizations/components/org-switcher";
 import { NotificationBell } from "@/features/notifications/components/notification-bell";
 
-// Decorative mini board for the brand panel.
-function BrandBoard() {
-  const columns = [3, 2, 3];
-  return (
-    <div className="grid max-w-sm grid-cols-3 gap-2" aria-hidden>
-      {columns.map((count, i) => (
-        <div key={i} className="grid content-start gap-2">
-          <span className="h-1.5 w-1/2 rounded-full bg-brand-foreground/50" />
-          {Array.from({ length: count }, (_, j) => (
-            <span key={j} className="h-9 rounded-md bg-brand-tile" />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// Login, register and the email-link pages: solid brand panel beside the form on wide
-// screens (UI-8); the form alone on phones. Flat colour only (UI-7).
+// Login, register and the email-link pages: the form in a centred card on a flat page
+// background, with the logo above it (UI-7: no gradients or glow).
 export function AuthLayout() {
   return (
-    <div className="grid min-h-svh bg-background lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      <aside className="hidden flex-col justify-between gap-10 bg-brand p-10 text-brand-foreground lg:flex">
-        <Logo onBrand />
-        <div className="grid max-w-md gap-3">
-          <h2 className="text-3xl font-semibold tracking-tight text-balance">
-            Plan, track and approve work in one place.
-          </h2>
-          <p className="text-brand-foreground/80">
-            Workspaces, Kanban boards and review steps for growing teams.
-          </p>
-        </div>
-        <BrandBoard />
-      </aside>
-      <main className="relative flex flex-col items-center justify-center gap-8 px-4 py-16 sm:px-8">
-        <div className="absolute top-3 right-3">
-          <ThemeToggle />
-        </div>
-        <div className="lg:hidden">
-          <Logo />
-        </div>
-        <Card className="w-full max-w-sm gap-6 bg-transparent py-0 ring-0 [--card-spacing:0px] [&_[data-slot=card-footer]]:border-0 [&_[data-slot=card-footer]]:bg-transparent [&_[data-slot=card-title]]:text-2xl [&_[data-slot=card-title]]:font-semibold [&_[data-slot=card-title]]:tracking-tight">
+    <div className="relative flex min-h-svh flex-col items-center justify-center gap-6 bg-muted/40 px-4 py-12">
+      <div className="absolute top-3 right-3">
+        <ThemeToggle />
+      </div>
+      <Logo />
+      <main className="w-full max-w-md">
+        <Card className="w-full gap-6 px-6 py-8 shadow-sm has-data-[slot=card-footer]:pb-8 sm:px-8 [--card-spacing:0px] [&_[data-slot=card-footer]]:border-0 [&_[data-slot=card-footer]]:bg-transparent [&_[data-slot=card-title]]:text-2xl [&_[data-slot=card-title]]:font-semibold [&_[data-slot=card-title]]:tracking-tight">
           <Outlet />
         </Card>
       </main>
+      <p className="max-w-md text-center text-xs text-muted-foreground">
+        Plan, track and approve work in one place.
+      </p>
     </div>
   );
 }
@@ -74,7 +46,7 @@ export function AppLayout() {
   return (
     <div className="min-h-svh bg-muted/40">
       <header className="border-b bg-background">
-        <div className="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4 sm:gap-4">
+        <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-2 px-4 sm:gap-4 sm:px-6 lg:px-8">
           <Logo compact />
           {!isOwner && <OrgSwitcher currentOrgId={orgMatch?.params.orgId} />}
           <nav className={isOwner ? "flex gap-4 text-sm" : "hidden gap-4 text-sm sm:flex"}>
@@ -110,7 +82,7 @@ export function AppLayout() {
           </div>
         </div>
       </header>
-      <main className="mx-auto grid max-w-5xl gap-6 p-4">
+      <main className="mx-auto grid max-w-screen-2xl gap-6 px-4 py-6 sm:px-6 lg:px-8">
         {!user.emailVerified && (
           <Alert>
             <MailWarningIcon aria-hidden />

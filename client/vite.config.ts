@@ -14,7 +14,8 @@ export default defineConfig({
     port: 5173,
     // Same-origin API in development, mirroring the Vercel rewrite in production (AU-12).
     proxy: {
-      "/api": "http://localhost:4000",
+      // API_PROXY_TARGET lets a second copy (e.g. a test API) run beside the usual one.
+      "/api": process.env.API_PROXY_TARGET ?? "http://localhost:4000",
     },
   },
 });

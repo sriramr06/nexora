@@ -8,7 +8,7 @@ import { useCurrentUser } from "@/lib/auth-store";
 export function WelcomePage() {
   const user = useCurrentUser();
   return (
-    <Card className="max-w-lg">
+    <Card className="mx-auto mt-8 w-full max-w-lg text-center sm:mt-16">
       <CardHeader>
         <CardTitle>Welcome, {user.name}</CardTitle>
         <CardDescription>
@@ -16,7 +16,7 @@ export function WelcomePage() {
           from your team.
         </CardDescription>
       </CardHeader>
-      <CardFooter className="mt-2">
+      <CardFooter className="mt-2 justify-center">
         <Link to="/organizations/new" className={buttonVariants()}>
           Register your organization
         </Link>

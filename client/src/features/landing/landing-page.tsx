@@ -87,7 +87,7 @@ export function LandingPage() {
   return (
     <div className="flex min-h-svh flex-col bg-background">
       <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4">
+        <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4">
           <Logo />
           <div className="ml-auto flex items-center gap-1">
             <ThemeToggle />
@@ -102,7 +102,7 @@ export function LandingPage() {
       </header>
 
       <main className="flex-1">
-        <section className="mx-auto max-w-6xl px-4 pt-16 pb-14 text-center sm:pt-24">
+        <section className="mx-auto max-w-7xl px-4 pt-16 pb-14 text-center sm:pt-24">
           <p className="text-sm font-medium text-primary">Project management for growing teams</p>
           <h1 className="mx-auto mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
             Plan, track and approve work in one place.
@@ -129,7 +129,7 @@ export function LandingPage() {
         </section>
 
         <section className="border-t bg-muted/40">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:py-20">
             <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
               Everything your team needs, nothing it doesn&apos;t.
             </h2>
@@ -149,7 +149,7 @@ export function LandingPage() {
       </main>
 
       <footer className="border-t">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 text-sm text-muted-foreground">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 text-sm text-muted-foreground">
           <span>© {new Date().getFullYear()} Nexora</span>
           <Link to="/login" className="hover:text-foreground">
             Log in
