@@ -11,6 +11,8 @@ import { ProjectModel, type ProjectDoc } from "../projects/project.model";
 import { actorOf, assertActive, factsOf, loadProject } from "../projects/project.service";
 import { UserModel } from "../users/user.model";
 import { CommentModel } from "../comments/comment.model";
+import { NotificationModel } from "../notifications/notification.model";
+import { notify } from "../notifications/notification.service";
 import { TaskModel, type TaskDoc, type TaskRecord } from "./task.model";
 
 type Id = Types.ObjectId;
@@ -135,6 +137,20 @@ export const snapshotOf = (project: { name: string }, task: { title: string }) =
   taskTitle: task.title,
 });
 
+// The common part of every task notification: who, where, and a display snapshot.
+export const notifyEvent = (
+  tenant: TenantContext,
+  user: AuthUser,
+  project: { _id: Id; name: string },
+  task: { _id: Id; title: string },
+) => ({
+  organizationId: tenant.organization._id,
+  actorId: user._id,
+  projectId: project._id,
+  taskId: task._id,
+  data: snapshotOf(project, task),
+});
+
 /**
  * Optimistic concurrency (API design §6): the update applies only if the stored version
  * is still the one the client saw, and bumps it. A stale write gets 409 instead of
@@ -226,6 +242,10 @@ export const createTask = async (
           ]
         : []),
     );
+    await notify(session, notifyEvent(tenant, user, project, created), {
+      type: "task.assigned",
+      recipients: [assigneeId ? new Types.ObjectId(assigneeId) : null],
+    });
     return created;
   });
   return toTask(tenant, task, project);
@@ -358,6 +378,12 @@ export const setAssignee = async (
       changes: { assigneeId: { from: current, to: assigneeId } },
       snapshot: snapshotOf(project, doc),
     });
+    await notify(
+      session,
+      notifyEvent(tenant, user, project, doc),
+      { type: "task.assigned", recipients: [doc.assigneeId] },
+      { type: "task.unassigned", recipients: [task.assigneeId] },
+    );
     return doc;
   });
   return toTask(tenant, updated, project);
@@ -374,8 +400,12 @@ export const deleteTask = async (tenant: TenantContext, user: AuthUser, taskId: 
       { _id: task._id, organizationId: tenant.organization._id },
       { session },
     );
-    // Data model §4.6: its comments go with it (notifications join in Sprint 6).
+    // Data model §4.6: its comments and the notifications linking to it go with it.
     await CommentModel.deleteMany(
+      { taskId: task._id, organizationId: tenant.organization._id },
+      { session },
+    );
+    await NotificationModel.deleteMany(
       { taskId: task._id, organizationId: tenant.organization._id },
       { session },
     );

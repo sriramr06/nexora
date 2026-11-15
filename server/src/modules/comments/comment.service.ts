@@ -7,13 +7,15 @@ import {
   type CursorPage,
 } from "@nexora/shared";
 import { AppError } from "../../common/errors/app-error";
+import { afterCursor, encodeCursor } from "../../common/db/cursor";
 import { forTenant } from "../../common/db/tenant-scope";
 import { withTransaction } from "../../common/db/transaction";
 import type { AuthUser } from "../../common/middleware/authenticate";
 import type { TenantContext } from "../../common/middleware/tenancy";
 import { recordActivity } from "../activity/activity.service";
+import { notify } from "../notifications/notification.service";
 import { actorOf, assertActive, factsOf, loadProject } from "../projects/project.service";
-import { loadTask } from "../tasks/task.service";
+import { loadTask, notifyEvent } from "../tasks/task.service";
 import { UserModel } from "../users/user.model";
 import { CommentModel, type CommentRecord } from "./comment.model";
 
@@ -40,18 +42,6 @@ const toComments = async (rows: (CommentRecord & { _id: Id })[]): Promise<Commen
   });
 };
 
-const encodeCursor = (c: { createdAt: Date; _id: Id }) =>
-  Buffer.from(`${c.createdAt.toISOString()}|${String(c._id)}`).toString("base64url");
-
-const decodeCursor = (cursor: string) => {
-  const [at, id] = Buffer.from(cursor, "base64url").toString("utf8").split("|");
-  const date = new Date(at ?? "");
-  if (!id || Number.isNaN(date.getTime()) || !/^[a-f0-9]{24}$/.test(id)) {
-    throw AppError.validation("Invalid cursor.");
-  }
-  return { date, id };
-};
-
 // FR-COM-02: oldest first, keyset-paginated on (createdAt, _id).
 export const listComments = async (
   tenant: TenantContext,
@@ -59,19 +49,8 @@ export const listComments = async (
   { cursor, limit }: { cursor?: string; limit: number },
 ): Promise<CursorPage<Comment>> => {
   const { task } = await loadTask(tenant, taskId);
-  const after = cursor ? decodeCursor(cursor) : null;
   const rows = await forTenant(CommentModel, tenant.organization._id)
-    .find({
-      taskId: task._id,
-      ...(after
-        ? {
-            $or: [
-              { createdAt: { $gt: after.date } },
-              { createdAt: after.date, _id: { $gt: after.id } },
-            ],
-          }
-        : {}),
-    })
+    .find({ taskId: task._id, ...afterCursor(cursor, "oldest") })
     .sort({ createdAt: 1, _id: 1 })
     .limit(limit + 1)
     .lean();
@@ -106,6 +85,10 @@ export const addComment = async (
       actorId: user._id,
       action: "comment.added",
       snapshot: { projectName: project.name, taskTitle: task.title },
+    });
+    await notify(session, notifyEvent(tenant, user, project, task), {
+      type: "comment.added",
+      recipients: [task.assigneeId, task.createdBy],
     });
     return comment;
   });

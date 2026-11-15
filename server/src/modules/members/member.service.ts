@@ -139,7 +139,7 @@ export const changeRole = async (
       if (role === "member") {
         await applyR12(organization._id, previousRole, target.userId, session);
         // R6 / R3: a Team Member cannot manage projects.
-        await onDemotedToMember(organization._id, target.userId, session);
+        await onDemotedToMember(organization._id, target.userId, actor.userId, session);
       }
     });
   }
@@ -168,7 +168,7 @@ const removeMembership = async (
     await MembershipModel.deleteOne({ _id: target._id, organizationId }, { session });
     await applyR12(organizationId, target.role, target.userId, session);
     // R5 / R6 data part: open tasks unassigned, managed projects unset, removed from
-    // project member lists — all in this transaction. (Notifications: Sprint 6.)
+    // project member lists, with notifications — all in this transaction.
     await onMemberLeavingOrganization(organizationId, target.userId, actorId, session);
   });
 

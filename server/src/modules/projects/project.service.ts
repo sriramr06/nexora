@@ -14,7 +14,9 @@ import type { AuthUser } from "../../common/middleware/authenticate";
 import type { TenantContext } from "../../common/middleware/tenancy";
 import { ActivityModel } from "../activity/activity.model";
 import { CommentModel } from "../comments/comment.model";
-import { recordActivity, type ActivityInput } from "../activity/activity.service";
+import { listActivity, recordActivity, type ActivityInput } from "../activity/activity.service";
+import { NotificationModel } from "../notifications/notification.model";
+import { notify, tenantAdminIds } from "../notifications/notification.service";
 import { MembershipModel } from "../members/membership.model";
 import { TaskModel, type TaskRecord } from "../tasks/task.model";
 import { UserModel } from "../users/user.model";
@@ -307,14 +309,28 @@ export const addMembers = async (
           }),
         ),
       );
+      await notify(
+        session,
+        {
+          organizationId: tenant.organization._id,
+          actorId: user._id,
+          projectId: project._id,
+          data: { projectName: project.name },
+        },
+        { type: "project.member_added", recipients: added },
+      );
     });
   }
   return toProject(project);
 };
 
+const nameOf = async (userId: Id, session: ClientSession) =>
+  (await UserModel.findById(userId, null, { session }).select("name").lean())?.name ?? "A member";
+
 /**
- * R5 (data part): a member leaving a project — or the organization — has their open tasks
- * unassigned, in the same transaction. Notifying the manager arrives in Sprint 6.
+ * R5: a member leaving a project — or the organization — has their open tasks unassigned,
+ * in the same transaction. Each affected project's manager gets one notification with
+ * the count (one per event, not per task — data model §4.9).
  */
 export const unassignOpenTasks = async (
   organizationId: Id,
@@ -342,9 +358,9 @@ export const unassignOpenTasks = async (
     null,
     { session },
   )
-    .select("name")
+    .select("name managerId")
     .lean();
-  const nameOf = new Map(projects.map((p) => [String(p._id), p.name]));
+  const projectName = new Map(projects.map((p) => [String(p._id), p.name]));
   await recordActivity(
     session,
     ...tasks.map((t) => ({
@@ -354,9 +370,62 @@ export const unassignOpenTasks = async (
       actorId,
       action: "task.unassigned" as const,
       changes: { assigneeId: { from: String(userId), to: null } },
-      snapshot: { projectName: nameOf.get(String(t.projectId)) ?? "", taskTitle: t.title },
+      snapshot: { projectName: projectName.get(String(t.projectId)) ?? "", taskTitle: t.title },
     })),
   );
+
+  const memberName = await nameOf(userId, session);
+  for (const project of projects) {
+    // A manager leaving their own project is not told about it.
+    if (!project.managerId || project.managerId.equals(userId)) continue;
+    const count = tasks.filter((t) => t.projectId.equals(project._id)).length;
+    await notify(
+      session,
+      { organizationId, actorId, projectId: project._id, data: { projectName: project.name } },
+      {
+        type: "project.tasks_unassigned",
+        recipients: [project.managerId],
+        data: { count, memberName },
+      },
+    );
+  }
+};
+
+/**
+ * R6: projects managed by this user lose their manager; every Tenant Admin is told, once
+ * per project, so someone assigns a new one.
+ */
+const unsetManager = async (
+  organizationId: Id,
+  userId: Id,
+  actorId: Id,
+  session: ClientSession,
+) => {
+  const managed = await ProjectModel.find({ organizationId, managerId: userId }, null, { session })
+    .select("name")
+    .lean();
+  if (managed.length === 0) return;
+  await ProjectModel.updateMany(
+    { organizationId, managerId: userId },
+    { $unset: { managerId: 1 } },
+    { session },
+  );
+  const [admins, memberName] = await Promise.all([
+    tenantAdminIds(organizationId, session),
+    nameOf(userId, session),
+  ]);
+  for (const project of managed) {
+    await notify(
+      session,
+      {
+        organizationId,
+        actorId,
+        projectId: project._id,
+        data: { projectName: project.name, memberName },
+      },
+      { type: "project.manager_unset", recipients: admins },
+    );
+  }
 };
 
 export const removeMember = async (
@@ -389,6 +458,16 @@ export const removeMember = async (
         changes: { member: { from: String(memberId), to: null } },
       }),
     );
+    await notify(
+      session,
+      {
+        organizationId: tenant.organization._id,
+        actorId: user._id,
+        projectId: project._id,
+        data: { projectName: project.name },
+      },
+      { type: "project.member_removed", recipients: [memberId] },
+    );
   });
   return toProject(project);
 };
@@ -418,8 +497,7 @@ export const setArchived = async (
   return toProject(project);
 };
 
-// FR-PROJ-07: the project, its tasks and its activity, all or nothing. (Comments and
-// notifications join this transaction when they exist — Sprints 5 and 6.)
+// FR-PROJ-07: the project with its tasks, comments, activity and notifications — all or nothing.
 export const deleteProject = async (tenant: TenantContext, projectId: string) => {
   if (!can(actorOf(tenant), "project.delete")) throw AppError.forbidden();
   const project = await loadProject(tenant, projectId);
@@ -429,6 +507,7 @@ export const deleteProject = async (tenant: TenantContext, projectId: string) =>
     await TaskModel.deleteMany({ organizationId, projectId: project._id }, { session });
     await CommentModel.deleteMany({ organizationId, projectId: project._id }, { session });
     await ActivityModel.deleteMany({ organizationId, projectId: project._id }, { session });
+    await NotificationModel.deleteMany({ organizationId, projectId: project._id }, { session });
     await ProjectModel.deleteOne({ organizationId, _id: project._id }, { session });
   });
 };
@@ -443,11 +522,7 @@ export const onMemberLeavingOrganization = async (
   session: ClientSession,
 ) => {
   await unassignOpenTasks(organizationId, userId, "all", session, actorId);
-  await ProjectModel.updateMany(
-    { organizationId, managerId: userId },
-    { $unset: { managerId: 1 } }, // R6
-    { session },
-  );
+  await unsetManager(organizationId, userId, actorId, session); // R6
   await ProjectModel.updateMany(
     { organizationId, memberIds: userId },
     { $pull: { memberIds: userId } },
@@ -456,12 +531,21 @@ export const onMemberLeavingOrganization = async (
 };
 
 // R6: a Project Manager demoted to Team Member no longer manages projects.
-export const onDemotedToMember = async (organizationId: Id, userId: Id, session: ClientSession) => {
-  await ProjectModel.updateMany(
-    { organizationId, managerId: userId },
-    { $unset: { managerId: 1 } },
-    { session },
-  );
+export const onDemotedToMember = async (
+  organizationId: Id,
+  userId: Id,
+  actorId: Id,
+  session: ClientSession,
+) => unsetManager(organizationId, userId, actorId, session);
+
+// FR-ACT-04
+export const projectActivity = async (
+  tenant: TenantContext,
+  projectId: string,
+  page: { cursor?: string; limit: number },
+) => {
+  const project = await loadProject(tenant, projectId);
+  return listActivity({ organizationId: tenant.organization._id, projectId: project._id }, page);
 };
 
 // Projects a Project Manager manages (R11 for invitations).

@@ -116,4 +116,10 @@ export const TENANT_ENDPOINTS: TenantEndpoint[] = [
   },
   { method: "patch", path: (o) => `/api/v1/orgs/${o}/comments/${ANY_ID}`, body: { body: "x" } },
   { method: "delete", path: (o) => `/api/v1/orgs/${o}/comments/${ANY_ID}` },
+  // Sprint 6: project feed, notifications
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/projects/${ANY_ID}/activity` },
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/notifications` },
+  { method: "get", path: (o) => `/api/v1/orgs/${o}/notifications/unread-count` },
+  { method: "post", path: (o) => `/api/v1/orgs/${o}/notifications/read-all` },
+  { method: "post", path: (o) => `/api/v1/orgs/${o}/notifications/${ANY_ID}/read` },
 ];

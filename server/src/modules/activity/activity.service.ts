@@ -1,6 +1,6 @@
 import type { ClientSession, Types } from "mongoose";
 import type { ActivityAction, ActivityEntry, CursorPage } from "@nexora/shared";
-import { AppError } from "../../common/errors/app-error";
+import { afterCursor, encodeCursor } from "../../common/db/cursor";
 import { UserModel } from "../users/user.model";
 import { ActivityModel, type ActivityRecord } from "./activity.model";
 
@@ -26,18 +26,6 @@ export const recordActivity = async (session: ClientSession, ...entries: Activit
 
 // ---------- reading (cursor-based, newest first) ----------
 
-const encodeCursor = (doc: { createdAt: Date; _id: Id }) =>
-  Buffer.from(`${doc.createdAt.toISOString()}|${String(doc._id)}`).toString("base64url");
-
-const decodeCursor = (cursor: string) => {
-  const [at, id] = Buffer.from(cursor, "base64url").toString("utf8").split("|");
-  const date = new Date(at ?? "");
-  if (!id || Number.isNaN(date.getTime()) || !/^[a-f0-9]{24}$/.test(id)) {
-    throw AppError.validation("Invalid cursor.");
-  }
-  return { date, id };
-};
-
 const userIdsIn = (entries: ActivityRecord[]) => {
   const ids = new Set<string>();
   for (const e of entries) {
@@ -52,17 +40,12 @@ const userIdsIn = (entries: ActivityRecord[]) => {
   return [...ids];
 };
 
-// Shared by the task history (FR-ACT-03) and, in Sprint 6, the project feed (FR-ACT-04).
+// Shared by the task history (FR-ACT-03) and the project feed (FR-ACT-04).
 export const listActivity = async (
   filter: { organizationId: Id; taskId?: Id; projectId?: Id },
   { cursor, limit }: { cursor?: string; limit: number },
 ): Promise<CursorPage<ActivityEntry>> => {
-  const query: Record<string, unknown> = { ...filter };
-  if (cursor) {
-    const { date, id } = decodeCursor(cursor);
-    // Keyset pagination on (createdAt, _id): stable even when new entries arrive.
-    query.$or = [{ createdAt: { $lt: date } }, { createdAt: date, _id: { $lt: id } }];
-  }
+  const query = { ...filter, ...afterCursor(cursor, "newest") };
 
   const docs = await ActivityModel.find(query)
     .sort({ createdAt: -1, _id: -1 })
