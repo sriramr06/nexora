@@ -1,4 +1,4 @@
-import type { QueryFilter } from "mongoose";
+import type { ClientSession, QueryFilter } from "mongoose";
 import {
   clearFlag,
   requestChanges,
@@ -20,11 +20,13 @@ import { withTransaction } from "../../common/db/transaction";
 import type { AuthUser } from "../../common/middleware/authenticate";
 import type { TenantContext } from "../../common/middleware/tenancy";
 import { recordActivity } from "../activity/activity.service";
+import { notify, reviewersOf, type Audience } from "../notifications/notification.service";
 import type { ProjectDoc } from "../projects/project.model";
 import { actorOf, assertActive, loadProject } from "../projects/project.service";
 import { TaskModel, type TaskDoc, type TaskRecord } from "./task.model";
 import {
   loadTask,
+  notifyEvent,
   snapshotOf,
   taskFacts,
   toDate,
@@ -53,7 +55,11 @@ interface Entry {
   reason?: string;
 }
 
-// Version-checked update + activity entry in one transaction (API design §6, FR-ACT-02).
+// Who hears about it (FR §12.1), most specific audience first.
+type Audiences = (session: ClientSession) => Promise<Audience[]> | Audience[];
+
+// Version-checked update + activity entry + notifications in one transaction
+// (API design §6, FR-ACT-02, INT-5).
 const changeWith = async (
   tenant: TenantContext,
   user: AuthUser,
@@ -62,6 +68,7 @@ const changeWith = async (
   version: number,
   update: Record<string, unknown>,
   entry: Entry,
+  audiences: Audiences,
 ): Promise<Task> => {
   const updated = await withTransaction(async (session) => {
     const doc = await updateIfVersion(tenant.organization._id, task._id, version, update, session);
@@ -73,6 +80,7 @@ const changeWith = async (
       snapshot: snapshotOf(project, doc),
       ...entry,
     });
+    await notify(session, notifyEvent(tenant, user, project, doc), ...(await audiences(session)));
     return doc;
   });
   return toTask(tenant, updated, project);
@@ -110,6 +118,18 @@ export const changeStatus = async (
         ...(clearsFlag ? { flag: { from: task.flag?.type ?? null, to: null } } : {}),
       },
     },
+    async (session) => [
+      // A submission is the more specific event for the reviewer.
+      ...(status === "in_review"
+        ? [
+            {
+              type: "task.submitted_for_review" as const,
+              recipients: await reviewersOf(tenant.organization._id, project, session),
+            },
+          ]
+        : []),
+      { type: "task.status_changed", recipients: [task.assigneeId], data: { status } },
+    ],
   );
 };
 
@@ -134,6 +154,7 @@ export const requestChangesOn = async (
       changes: { status: { from: "in_review", to: "in_progress" } },
       reason,
     },
+    () => [{ type: "task.changes_requested", recipients: [task.assigneeId], data: { reason } }],
   );
 };
 
@@ -158,6 +179,17 @@ export const flagTask = async (
       changes: { flag: { from: task.flag?.type ?? null, to: type } },
       reason,
     },
+    // FR §12.1 notifies on Blocked only; On hold is visible on the board.
+    async (session) =>
+      type === "blocked"
+        ? [
+            {
+              type: "task.blocked",
+              recipients: await reviewersOf(tenant.organization._id, project, session),
+              data: { reason },
+            },
+          ]
+        : [],
   );
 };
 
@@ -180,6 +212,10 @@ export const unflagTask = async (
       action: "task.unflagged",
       changes: { flag: { from: task.flag?.type ?? null, to: null } },
     },
+    () =>
+      task.flag?.type === "blocked"
+        ? [{ type: "task.unblocked", recipients: [task.assigneeId] }]
+        : [],
   );
 };
 

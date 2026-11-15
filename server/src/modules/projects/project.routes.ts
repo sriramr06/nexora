@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  activityQuerySchema,
   addProjectMembersSchema,
   createProjectSchema,
   projectsQuerySchema,
@@ -72,6 +73,19 @@ export const createProjectRouter = (): Router => {
         String(req.params.userId),
       ),
     );
+  });
+
+  // FR-ACT-04: project activity feed, newest first.
+  router.get("/:projectId/activity", validate({ query: activityQuerySchema }), async (req, res) => {
+    res
+      .status(200)
+      .json(
+        await projects.projectActivity(
+          currentTenant(req),
+          id(req),
+          res.locals.query as z.output<typeof activityQuerySchema>,
+        ),
+      );
   });
 
   router.post("/:projectId/archive", async (req, res) => {

@@ -9,3 +9,4 @@ export * from "./permissions";
 export * from "./schemas/members";
 export * from "./schemas/projects";
 export * from "./workflow";
+export * from "./schemas/notifications";

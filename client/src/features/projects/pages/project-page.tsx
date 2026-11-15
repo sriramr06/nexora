@@ -55,6 +55,7 @@ import { useMembers } from "@/features/members/members-api";
 import { useOrg } from "@/features/organizations/org-gate";
 import { useNavigate } from "react-router";
 import { DueDate, PriorityLabel } from "../components/task-badges";
+import { ProjectActivity } from "../components/project-activity";
 import { Board } from "../components/board";
 import { BlockedTasksDialog, BoardFilterBar, SummaryStrip } from "../components/board-toolbar";
 import type { BoardFilters } from "../projects-api";
@@ -535,7 +536,7 @@ export function ProjectPage({
   const project = useProject(organization.id, projectId);
   const archive = useArchiveProject(organization.id, projectId);
   // Sprint 5: the board is the default view; the list stays as an alternative.
-  const [tab, setTab] = useState<"board" | "list" | "members">("board");
+  const [tab, setTab] = useState<"board" | "list" | "members" | "activity">("board");
   const [filters, setFilters] = useState<BoardFilters>({});
   const [showBlocked, setShowBlocked] = useState(false);
   const [dialog, setDialog] = useState<"edit" | "delete" | "task" | null>(null);
@@ -641,8 +642,12 @@ export function ProjectPage({
 
       <SummaryStrip project={p} onShowBlocked={() => setShowBlocked(true)} />
 
-      <div role="tablist" aria-label="Project" className="flex gap-5 border-b text-sm">
-        {(["board", "list", "members"] as const).map((t) => (
+      <div
+        role="tablist"
+        aria-label="Project"
+        className="flex gap-5 overflow-x-auto border-b text-sm"
+      >
+        {(["board", "list", "members", "activity"] as const).map((t) => (
           <button
             key={t}
             role="tab"
@@ -668,6 +673,7 @@ export function ProjectPage({
       )}
       {tab === "list" && <TaskList project={p} />}
       {tab === "members" && <ProjectMembers project={p} canManage={canManageMembers} />}
+      {tab === "activity" && <ProjectActivity projectId={p.id} />}
       <BlockedTasksDialog project={p} open={showBlocked} onOpenChange={setShowBlocked} />
 
       {canUpdate && (
