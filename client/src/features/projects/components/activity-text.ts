@@ -50,11 +50,17 @@ export const describeActivity = (entry: ActivityEntry): string => {
         )
         .join(", ");
     case "task.status_changed":
-      return `moved it from ${show("status", changes.status?.from)} to ${show("status", changes.status?.to)}`;
+      return changes.status?.to === "done" && changes.status?.from === "in_review"
+        ? "approved it"
+        : `moved it from ${show("status", changes.status?.from)} to ${show("status", changes.status?.to)}`;
     case "task.changes_requested":
-      return "requested changes";
+      return `requested changes: “${entry.reason ?? ""}”`;
     case "task.flagged":
-      return "flagged the task";
+      return `marked it ${changes.flag?.to === "blocked" ? "blocked" : "on hold"}: “${entry.reason ?? ""}”`;
+    case "comment.added":
+      return "commented";
+    case "comment.deleted":
+      return "deleted a comment";
     case "task.unflagged":
       return "cleared the flag";
     case "task.deleted":

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   PROJECT_STATUSES,
+  TASK_FLAG_TYPES,
   TASK_PRIORITIES,
   TASK_STATUSES,
   type ProjectStatus,
@@ -211,3 +212,62 @@ export const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
   high: "High",
   urgent: "Urgent",
 };
+
+// ---------- board and workflow (FR-BOARD, R14 – R16) ----------
+
+export const changeStatusSchema = z.object({
+  status: z.enum(TASK_STATUSES),
+  version: versionSchema,
+});
+
+const reasonSchema = z
+  .string()
+  .trim()
+  .min(1, "Please give a reason.")
+  .max(500, "Reason must not exceed 500 characters.");
+
+export const requestChangesSchema = z.object({ reason: reasonSchema, version: versionSchema });
+
+export const setFlagSchema = z.object({
+  type: z.enum(TASK_FLAG_TYPES),
+  reason: reasonSchema,
+  version: versionSchema,
+});
+
+export const versionOnlySchema = z.object({ version: versionSchema });
+
+export const boardQuerySchema = z.object({
+  // "me" and "none" are resolved on the server.
+  assigneeId: z.union([objectId, z.literal("none")]).optional(),
+  priority: z.enum(TASK_PRIORITIES).optional(),
+  flag: z.enum(TASK_FLAG_TYPES).optional(),
+});
+
+export type Board = Record<TaskStatus, Task[]>;
+
+export interface ProjectSummary {
+  counts: Record<TaskStatus, number>;
+  total: number;
+  overdue: number;
+  blocked: number;
+  percentComplete: number;
+}
+
+// ---------- comments (FR-COM) ----------
+
+export const commentBodySchema = z.object({
+  body: z
+    .string()
+    .trim()
+    .min(1, "Write something first.")
+    .max(2000, "Comments must not exceed 2,000 characters."),
+});
+
+export interface Comment {
+  id: string;
+  taskId: string;
+  author: UserRef | null;
+  body: string;
+  editedAt: string | null;
+  createdAt: string;
+}

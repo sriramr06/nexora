@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   ActivityEntry,
+  Board,
+  Comment,
+  ProjectSummary,
+  TaskFlagType,
+  TaskPriority,
   CreateProjectInput,
   CreateTaskInput,
   CursorPage,
@@ -222,3 +227,159 @@ export const useDeleteTask = (orgId: string) => {
     },
   });
 };
+
+// ---------- board, summary, workflow (Sprint 5) ----------
+
+export interface BoardFilters {
+  assigneeId?: string; // a user ID or "none"
+  priority?: TaskPriority;
+  flag?: TaskFlagType;
+}
+
+export const boardKeys = {
+  board: (orgId: string, projectId: string, f: BoardFilters) =>
+    ["orgs", orgId, "projects", projectId, "board", f] as const,
+  boardAll: (orgId: string, projectId: string) =>
+    ["orgs", orgId, "projects", projectId, "board"] as const,
+  summary: (orgId: string, projectId: string) =>
+    ["orgs", orgId, "projects", projectId, "summary"] as const,
+  blocked: (orgId: string, projectId: string) =>
+    ["orgs", orgId, "projects", projectId, "blocked"] as const,
+  comments: (orgId: string, taskId: string) =>
+    ["orgs", orgId, "tasks", taskId, "comments"] as const,
+};
+
+export const useBoard = (orgId: string, projectId: string, filters: BoardFilters) =>
+  useQuery({
+    queryKey: boardKeys.board(orgId, projectId, filters),
+    queryFn: async () =>
+      (
+        await api.get<{ data: Board }>(`${base(orgId)}/projects/${projectId}/board`, {
+          params: filters,
+        })
+      ).data.data,
+  });
+
+export const useProjectSummary = (orgId: string, projectId: string) =>
+  useQuery({
+    queryKey: boardKeys.summary(orgId, projectId),
+    queryFn: async () =>
+      (await api.get<{ data: ProjectSummary }>(`${base(orgId)}/projects/${projectId}/summary`)).data
+        .data,
+  });
+
+export const useBlockedTasks = (orgId: string, projectId: string, enabled: boolean) =>
+  useQuery({
+    queryKey: boardKeys.blocked(orgId, projectId),
+    queryFn: async () =>
+      (await api.get<{ data: Task[] }>(`${base(orgId)}/projects/${projectId}/blocked-tasks`)).data
+        .data,
+    enabled,
+  });
+
+// Any workflow change can affect the task, its board, the summary, lists and history.
+const useWorkflowMutation = <TArgs>(orgId: string, fn: (args: TArgs) => Promise<Task>) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: fn,
+    onSuccess: (task) => qc.setQueryData(projectKeys.task(orgId, task.id), task),
+    onSettled: (task) => {
+      if (!task) return;
+      void qc.invalidateQueries({ queryKey: ["orgs", orgId, "projects", task.projectId] });
+      void qc.invalidateQueries({ queryKey: projectKeys.taskActivity(orgId, task.id) });
+      void qc.invalidateQueries({ queryKey: ["orgs", orgId, "my-tasks"] });
+      void qc.invalidateQueries({ queryKey: projectKeys.list(orgId) });
+    },
+  });
+};
+
+export const useChangeStatus = (orgId: string) =>
+  useWorkflowMutation(
+    orgId,
+    async ({ task, status }: { task: Task; status: TaskStatus }) =>
+      (
+        await api.post<{ data: Task }>(`${base(orgId)}/tasks/${task.id}/status`, {
+          status,
+          version: task.version,
+        })
+      ).data.data,
+  );
+
+export const useRequestChanges = (orgId: string) =>
+  useWorkflowMutation(
+    orgId,
+    async ({ task, reason }: { task: Task; reason: string }) =>
+      (
+        await api.post<{ data: Task }>(`${base(orgId)}/tasks/${task.id}/request-changes`, {
+          reason,
+          version: task.version,
+        })
+      ).data.data,
+  );
+
+export const useSetFlag = (orgId: string) =>
+  useWorkflowMutation(
+    orgId,
+    async ({ task, type, reason }: { task: Task; type: TaskFlagType; reason: string }) =>
+      (
+        await api.put<{ data: Task }>(`${base(orgId)}/tasks/${task.id}/flag`, {
+          type,
+          reason,
+          version: task.version,
+        })
+      ).data.data,
+  );
+
+export const useClearFlag = (orgId: string) =>
+  useWorkflowMutation(
+    orgId,
+    async (task: Task) =>
+      (
+        await api.delete<{ data: Task }>(`${base(orgId)}/tasks/${task.id}/flag`, {
+          data: { version: task.version },
+        })
+      ).data.data,
+  );
+
+// ---------- comments (FR-COM) ----------
+
+export const useComments = (orgId: string, taskId: string) =>
+  useQuery({
+    queryKey: boardKeys.comments(orgId, taskId),
+    queryFn: async () =>
+      (
+        await api.get<CursorPage<Comment>>(`${base(orgId)}/tasks/${taskId}/comments`, {
+          params: { limit: 100 },
+        })
+      ).data,
+  });
+
+const useCommentMutation = <TArgs>(
+  orgId: string,
+  taskId: string,
+  fn: (args: TArgs) => Promise<unknown>,
+) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: fn,
+    onSettled: () => {
+      void qc.invalidateQueries({ queryKey: boardKeys.comments(orgId, taskId) });
+      void qc.invalidateQueries({ queryKey: projectKeys.taskActivity(orgId, taskId) });
+    },
+  });
+};
+
+export const useAddComment = (orgId: string, taskId: string) =>
+  useCommentMutation(orgId, taskId, async (body: string) =>
+    api.post(`${base(orgId)}/tasks/${taskId}/comments`, { body }),
+  );
+
+export const useEditComment = (orgId: string, taskId: string) =>
+  useCommentMutation(orgId, taskId, async ({ id, body }: { id: string; body: string }) =>
+    api.patch(`${base(orgId)}/comments/${id}`, { body }),
+  );
+
+export const useDeleteComment = (orgId: string, taskId: string) =>
+  useCommentMutation(orgId, taskId, async (id: string) =>
+    api.delete(`${base(orgId)}/comments/${id}`),
+  );

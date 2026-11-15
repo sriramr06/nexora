@@ -83,8 +83,8 @@ export function OrgGate() {
 
 const tabClass = ({ isActive }: { isActive: boolean }) =>
   isActive
-    ? "border-b-2 border-primary pb-2 text-foreground"
-    : "border-b-2 border-transparent pb-2 text-muted-foreground hover:text-foreground";
+    ? "border-b-2 border-primary pb-2 whitespace-nowrap text-foreground"
+    : "border-b-2 border-transparent pb-2 whitespace-nowrap text-muted-foreground hover:text-foreground";
 
 // Tabs shown to each role (Roles §5.1); the API enforces the same rules.
 function OrgNav({ orgId, allows }: { orgId: string; allows: OrgContext["allows"] }) {

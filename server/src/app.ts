@@ -17,6 +17,7 @@ import {
 import { createMeRouter, createUserRouter } from "./modules/users/me.routes";
 import { createProjectRouter } from "./modules/projects/project.routes";
 import { createTaskRouter } from "./modules/tasks/task.routes";
+import { createCommentRouter } from "./modules/comments/comment.routes";
 import { createPlatformRouter } from "./modules/platform/platform.routes";
 
 // Creates the Express application without starting a server,
@@ -51,6 +52,7 @@ export function createApp() {
   app.use(`${API_PREFIX}/orgs/:orgId/invitations`, createTenantInvitationRouter());
   app.use(`${API_PREFIX}/orgs/:orgId/projects`, createProjectRouter());
   app.use(`${API_PREFIX}/orgs/:orgId`, createTaskRouter());
+  app.use(`${API_PREFIX}/orgs/:orgId`, createCommentRouter());
   app.use(`${API_PREFIX}/platform`, createPlatformRouter());
 
   app.use(notFound);

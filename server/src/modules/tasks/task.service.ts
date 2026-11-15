@@ -10,6 +10,7 @@ import { listActivity, recordActivity } from "../activity/activity.service";
 import { ProjectModel, type ProjectDoc } from "../projects/project.model";
 import { actorOf, assertActive, factsOf, loadProject } from "../projects/project.service";
 import { UserModel } from "../users/user.model";
+import { CommentModel } from "../comments/comment.model";
 import { TaskModel, type TaskDoc, type TaskRecord } from "./task.model";
 
 type Id = Types.ObjectId;
@@ -25,7 +26,7 @@ const versionConflict = () =>
 // ---------- dates (data model §4.6) ----------
 
 // "2026-11-30" ↔ UTC midnight of that calendar date.
-const toDate = (day: string) => new Date(`${day}T00:00:00.000Z`);
+export const toDate = (day: string) => new Date(`${day}T00:00:00.000Z`);
 const toDay = (date: Date) => date.toISOString().slice(0, 10);
 
 // FR-TASK-10: "today" in the organization's timezone, not the server's.
@@ -88,7 +89,7 @@ export const toTasks = async (
   }));
 };
 
-const toTask = async (
+export const toTask = async (
   tenant: TenantContext,
   task: TaskDoc | (TaskRecord & { _id: Id }),
   project: { _id: Id; name: string },
@@ -102,7 +103,7 @@ const toTask = async (
   )[0]!;
 
 // A task is visible only through its project: no project access → "not found" (Roles §2).
-const loadTask = async (tenant: TenantContext, taskId: string) => {
+export const loadTask = async (tenant: TenantContext, taskId: string) => {
   const task = await forTenant(TaskModel, tenant.organization._id)
     .findById(taskId)
     .catch(() => null);
@@ -113,7 +114,10 @@ const loadTask = async (tenant: TenantContext, taskId: string) => {
   return { task, project };
 };
 
-const taskFacts = (project: ProjectDoc, task: { assigneeId?: Id | null; createdBy: Id }) => ({
+export const taskFacts = (
+  project: ProjectDoc,
+  task: { assigneeId?: Id | null; createdBy: Id },
+) => ({
   ...factsOf(project),
   assigneeId: task.assigneeId ? String(task.assigneeId) : null,
   createdBy: String(task.createdBy),
@@ -126,7 +130,7 @@ const assertProjectMember = (project: ProjectDoc, userId: string) => {
   }
 };
 
-const snapshotOf = (project: { name: string }, task: { title: string }) => ({
+export const snapshotOf = (project: { name: string }, task: { title: string }) => ({
   projectName: project.name,
   taskTitle: task.title,
 });
@@ -136,7 +140,7 @@ const snapshotOf = (project: { name: string }, task: { title: string }) => ({
  * is still the one the client saw, and bumps it. A stale write gets 409 instead of
  * silently overwriting someone else's change.
  */
-const updateIfVersion = async (
+export const updateIfVersion = async (
   organizationId: Id,
   taskId: Id,
   version: number,
@@ -368,6 +372,11 @@ export const deleteTask = async (tenant: TenantContext, user: AuthUser, taskId: 
   await withTransaction(async (session) => {
     await TaskModel.deleteOne(
       { _id: task._id, organizationId: tenant.organization._id },
+      { session },
+    );
+    // Data model §4.6: its comments go with it (notifications join in Sprint 6).
+    await CommentModel.deleteMany(
+      { taskId: task._id, organizationId: tenant.organization._id },
       { session },
     );
     await recordActivity(session, {

@@ -30,7 +30,7 @@ import {
   RequireVerified,
 } from "./guards";
 import { AppLayout, AuthLayout } from "./layouts";
-import { NotFoundPage, WelcomePage } from "./placeholder-pages";
+import { ErrorPage, NotFoundPage, WelcomePage } from "./placeholder-pages";
 
 // "/": landing page for visitors; logged-in users go straight into the app (FE §5).
 function HomeRoute() {
@@ -42,70 +42,76 @@ function HomeRoute() {
 
 // Routes from the frontend architecture §5 (auth part; the rest arrives per sprint).
 export const router = createBrowserRouter([
-  { path: "/", element: <HomeRoute /> },
   {
-    element: <RequireGuest />,
+    // Any render error below shows ErrorPage instead of the developer screen.
+    errorElement: <ErrorPage />,
     children: [
+      { path: "/", element: <HomeRoute /> },
       {
-        element: <AuthLayout />,
+        element: <RequireGuest />,
         children: [
-          { path: "/login", element: <LoginPage /> },
-          { path: "/register", element: <RegisterPage /> },
-          { path: "/forgot-password", element: <ForgotPasswordPage /> },
+          {
+            element: <AuthLayout />,
+            children: [
+              { path: "/login", element: <LoginPage /> },
+              { path: "/register", element: <RegisterPage /> },
+              { path: "/forgot-password", element: <ForgotPasswordPage /> },
+            ],
+          },
         ],
       },
-    ],
-  },
-  {
-    // Email-link pages work whether or not the user is logged in.
-    element: <AuthLayout />,
-    children: [
-      { path: "/verify-email", element: <VerifyEmailPage /> },
-      { path: "/reset-password", element: <ResetPasswordPage /> },
-      { path: "/invite", element: <AcceptInvitationPage /> },
-    ],
-  },
-  {
-    element: <RequireAuth />,
-    children: [
       {
-        element: <AppLayout />,
+        // Email-link pages work whether or not the user is logged in.
+        element: <AuthLayout />,
         children: [
-          { path: "/account", element: <AccountPage /> },
+          { path: "/verify-email", element: <VerifyEmailPage /> },
+          { path: "/reset-password", element: <ResetPasswordPage /> },
+          { path: "/invite", element: <AcceptInvitationPage /> },
+        ],
+      },
+      {
+        element: <RequireAuth />,
+        children: [
           {
-            element: <RequireTenantUser />,
+            element: <AppLayout />,
             children: [
-              { path: "/welcome", element: <WelcomePage /> },
+              { path: "/account", element: <AccountPage /> },
               {
-                element: <RequireVerified />,
-                children: [{ path: "/organizations/new", element: <NewOrganizationPage /> }],
+                element: <RequireTenantUser />,
+                children: [
+                  { path: "/welcome", element: <WelcomePage /> },
+                  {
+                    element: <RequireVerified />,
+                    children: [{ path: "/organizations/new", element: <NewOrganizationPage /> }],
+                  },
+                  {
+                    path: "/o/:orgId",
+                    element: <OrgGate />,
+                    children: [
+                      { index: true, element: <OrgHomePage /> },
+                      { path: "projects", element: <ProjectsPage /> },
+                      { path: "projects/:projectId", element: <ProjectPage /> },
+                      { path: "tasks/:taskId", element: <TaskRoute /> },
+                      { path: "my-tasks", element: <MyTasksPage /> },
+                      { path: "members", element: <MembersPage /> },
+                      { path: "invitations", element: <InvitationsPage /> },
+                      { path: "settings", element: <OrgSettingsPage /> },
+                    ],
+                  },
+                ],
               },
               {
-                path: "/o/:orgId",
-                element: <OrgGate />,
+                element: <RequireOwner />,
                 children: [
-                  { index: true, element: <OrgHomePage /> },
-                  { path: "projects", element: <ProjectsPage /> },
-                  { path: "projects/:projectId", element: <ProjectPage /> },
-                  { path: "tasks/:taskId", element: <TaskRoute /> },
-                  { path: "my-tasks", element: <MyTasksPage /> },
-                  { path: "members", element: <MembersPage /> },
-                  { path: "invitations", element: <InvitationsPage /> },
-                  { path: "settings", element: <OrgSettingsPage /> },
+                  { path: "/platform/organizations", element: <PlatformOrgsPage /> },
+                  { path: "/platform/organizations/:id", element: <PlatformOrgDetailPage /> },
                 ],
               },
             ],
           },
-          {
-            element: <RequireOwner />,
-            children: [
-              { path: "/platform/organizations", element: <PlatformOrgsPage /> },
-              { path: "/platform/organizations/:id", element: <PlatformOrgDetailPage /> },
-            ],
-          },
         ],
       },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
-  { path: "*", element: <NotFoundPage /> },
 ]);

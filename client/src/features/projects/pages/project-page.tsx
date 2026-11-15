@@ -55,6 +55,9 @@ import { useMembers } from "@/features/members/members-api";
 import { useOrg } from "@/features/organizations/org-gate";
 import { useNavigate } from "react-router";
 import { DueDate, PriorityLabel } from "../components/task-badges";
+import { Board } from "../components/board";
+import { BlockedTasksDialog, BoardFilterBar, SummaryStrip } from "../components/board-toolbar";
+import type { BoardFilters } from "../projects-api";
 import {
   useAddProjectMembers,
   useArchiveProject,
@@ -531,7 +534,10 @@ export function ProjectPage({
   const { organization, actor } = useOrg();
   const project = useProject(organization.id, projectId);
   const archive = useArchiveProject(organization.id, projectId);
-  const [tab, setTab] = useState<"tasks" | "members">("tasks");
+  // Sprint 5: the board is the default view; the list stays as an alternative.
+  const [tab, setTab] = useState<"board" | "list" | "members">("board");
+  const [filters, setFilters] = useState<BoardFilters>({});
+  const [showBlocked, setShowBlocked] = useState(false);
   const [dialog, setDialog] = useState<"edit" | "delete" | "task" | null>(null);
 
   if (project.isPending) return <Skeleton className="h-64 w-full" />;
@@ -633,8 +639,10 @@ export function ProjectPage({
         </div>
       </div>
 
+      <SummaryStrip project={p} onShowBlocked={() => setShowBlocked(true)} />
+
       <div role="tablist" aria-label="Project" className="flex gap-5 border-b text-sm">
-        {(["tasks", "members"] as const).map((t) => (
+        {(["board", "list", "members"] as const).map((t) => (
           <button
             key={t}
             role="tab"
@@ -652,11 +660,15 @@ export function ProjectPage({
         ))}
       </div>
 
-      {tab === "tasks" ? (
-        <TaskList project={p} />
-      ) : (
-        <ProjectMembers project={p} canManage={canManageMembers} />
+      {tab === "board" && (
+        <div className="grid gap-4">
+          <BoardFilterBar project={p} filters={filters} onChange={setFilters} />
+          <Board project={p} filters={filters} />
+        </div>
       )}
+      {tab === "list" && <TaskList project={p} />}
+      {tab === "members" && <ProjectMembers project={p} canManage={canManageMembers} />}
+      <BlockedTasksDialog project={p} open={showBlocked} onOpenChange={setShowBlocked} />
 
       {canUpdate && (
         <EditProjectDialog
