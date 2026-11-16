@@ -44,7 +44,8 @@ jobs:
   # Real browser journeys (J1, J3, J5) against an in-memory database. Runs beside `checks`.
   e2e:
     name: End-to-end (Playwright)
-    runs-on: ubuntu-latest
+    # Pinned: Playwright 1.56 supports Ubuntu 24.04, not the 26.04 image behind ubuntu-latest.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
