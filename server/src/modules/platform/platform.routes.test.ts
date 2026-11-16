@@ -38,10 +38,10 @@ describe("access", () => {
 
 describe("GET /platform/organizations (US-09)", () => {
   it("filters by status, searches by name and paginates", async () => {
-    const admin = await createUser();
-    await createOrg(admin, { name: "Acme Corp", status: "pending_approval" });
-    await createOrg(admin, { name: "Beta Works", status: "active" });
-    await createOrg(admin, { name: "Acme Labs", status: "active" });
+    // One organization per creator (FR-ORG-09), so each has its own admin.
+    await createOrg(await createUser(), { name: "Acme Corp", status: "pending_approval" });
+    await createOrg(await createUser(), { name: "Beta Works", status: "active" });
+    await createOrg(await createUser(), { name: "Acme Labs", status: "active" });
 
     const pending = await asOwner("get", `${PLATFORM}?status=pending_approval`);
     expect(pending.body.data.map((o: { name: string }) => o.name)).toEqual(["Acme Corp"]);

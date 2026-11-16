@@ -35,16 +35,9 @@ const organizationSchema = new Schema(
 
 organizationSchema.index({ status: 1, createdAt: 1 });
 organizationSchema.index({ name: 1 });
-// FR-ORG-09 enforced by the database: one Pending / Rejected organization per creator.
-// Two parallel registrations cannot both pass, even though each checked "none open".
-organizationSchema.index(
-  { createdBy: 1 },
-  {
-    name: "one_open_registration_per_user",
-    unique: true,
-    partialFilterExpression: { status: { $in: ["pending_approval", "rejected"] } },
-  },
-);
+// FR-ORG-09 enforced by the database: each user creates at most one organization, ever.
+// Two parallel registrations cannot both pass, even though each checked "none yet".
+organizationSchema.index({ createdBy: 1 }, { name: "one_organization_per_user", unique: true });
 
 export type OrganizationRecord = InferSchemaType<typeof organizationSchema>;
 export type OrganizationDoc = HydratedDocument<OrganizationRecord>;

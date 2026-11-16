@@ -115,6 +115,7 @@ export interface MyOrganization {
   name: string;
   status: OrgStatus;
   role: OrgRole;
+  createdByMe: boolean; // FR-ORG-09: one organization per creator
 }
 
 export interface PlatformOrganizationSummary {
