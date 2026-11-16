@@ -22,7 +22,8 @@
     "format:check": "prettier . --check",
     "db:seed": "npm run db:seed -w @nexora/server",
     "db:sync-indexes": "npm run db:sync-indexes -w @nexora/server",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "db:seed:demo": "npm run db:seed:demo -w @nexora/server"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
