@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OrganizationForm } from "../components/organization-form";
-import { openRegistrationOf } from "../components/org-switcher";
+import { createdOrganizationOf } from "../components/org-switcher";
 import { useMyOrganizations, useRegisterOrganization } from "../org-api";
 
 // US-06 (behind RequireVerified, FR-AUTH-05). Centred like a dialog: it is the only
@@ -20,24 +20,23 @@ export function NewOrganizationPage() {
   const navigate = useNavigate();
   const register = useRegisterOrganization();
   const mine = useMyOrganizations();
-  const open = openRegistrationOf(mine.data ?? []);
+  const created = createdOrganizationOf(mine.data ?? []);
 
   if (mine.isPending) return <Skeleton className="mx-auto h-96 w-full max-w-2xl" />;
 
-  // FR-ORG-09: one Pending / Rejected registration at a time (the server enforces it too).
-  if (open) {
+  // FR-ORG-09: one organization per user (the server enforces it too).
+  if (created) {
     return (
       <Card className="mx-auto mt-8 w-full max-w-lg text-center sm:mt-16">
         <CardHeader>
-          <CardTitle>You already have a registration in progress</CardTitle>
+          <CardTitle>You have already registered an organization</CardTitle>
           <CardDescription>
-            “{open.name}” is {open.status === "rejected" ? "rejected" : "awaiting approval"}. You
-            can register another organization once it is approved.
+            Each account can register one organization. You can still be invited to others.
           </CardDescription>
         </CardHeader>
         <CardFooter className="mt-2 justify-center">
-          <Link to={`/o/${open.id}`} className={buttonVariants()}>
-            Open {open.name}
+          <Link to={`/o/${created.id}`} className={buttonVariants()}>
+            Open {created.name}
           </Link>
         </CardFooter>
       </Card>

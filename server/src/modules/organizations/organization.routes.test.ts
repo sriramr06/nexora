@@ -60,7 +60,7 @@ describe("POST /orgs (US-06)", () => {
     expect(res.status).toBe(403);
   });
 
-  it("allows only one open registration per user (FR-ORG-09)", async () => {
+  it("allows only one organization per user (FR-ORG-09)", async () => {
     const priya = await createUser();
     await register(priya);
 
@@ -78,11 +78,26 @@ describe("POST /orgs (US-06)", () => {
     expect(await OrganizationModel.countDocuments({ createdBy: priya._id })).toBe(1);
   });
 
-  it("allows a new registration once the previous one is approved", async () => {
+  it("still refuses a second organization after the first is approved", async () => {
     const priya = await createUser();
     await createOrg(priya, { status: "active" });
 
-    expect((await register(priya, { ...orgDetails, name: "Second Co" })).status).toBe(201);
+    const res = await register(priya, { ...orgDetails, name: "Second Co" });
+    expect(res.status).toBe(409);
+    expect(res.body.error.message).toMatch(/already registered an organization/);
+  });
+
+  it("lists which organization the user created, for the register option", async () => {
+    const priya = await createUser();
+    const acme = await createOrg(priya, { status: "active" });
+    const arun = await createUser();
+    await addMember(acme._id, arun, "member");
+
+    const mine = async (u: typeof priya) =>
+      (await request(app).get("/api/v1/me/organizations").set("Authorization", bearer(u))).body
+        .data;
+    expect((await mine(priya))[0]).toMatchObject({ createdByMe: true });
+    expect((await mine(arun))[0]).toMatchObject({ createdByMe: false });
   });
 });
 

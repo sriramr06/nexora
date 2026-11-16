@@ -10,20 +10,18 @@ import { MembershipModel } from "../members/membership.model";
 import { OrganizationModel } from "./organization.model";
 import { toOrganization } from "./organization.serializer";
 
-const OPEN_STATUSES = ["pending_approval", "rejected"] as const;
-
-const openRegistrationExists = () =>
+const organizationAlreadyCreated = () =>
   new AppError(
     409,
     ERROR_CODES.DUPLICATE,
-    "You already have an organization awaiting approval. Wait for a decision, or update and resubmit it.",
+    "You have already registered an organization. Each account can register one; you can still be invited to others.",
   );
 
 const isDuplicateKeyError = (error: unknown) =>
   typeof error === "object" && error !== null && "code" in error && error.code === 11000;
 
 const historyEntry = (
-  status: (typeof OPEN_STATUSES)[number] | "active",
+  status: "pending_approval" | "rejected" | "active",
   userId: Types.ObjectId,
 ) => ({ status, changedBy: userId, changedAt: new Date() });
 
@@ -36,9 +34,9 @@ export const registerOrganization = async (
     throw AppError.forbidden("The Application Owner cannot belong to organizations.");
   }
 
-  // Fast, friendly check; the partial unique index is the real guarantee under races.
-  if (await OrganizationModel.exists({ createdBy: user._id, status: { $in: OPEN_STATUSES } })) {
-    throw openRegistrationExists();
+  // Fast, friendly check; the unique index is the real guarantee under races.
+  if (await OrganizationModel.exists({ createdBy: user._id })) {
+    throw organizationAlreadyCreated();
   }
 
   try {
@@ -62,7 +60,7 @@ export const registerOrganization = async (
       return { organization: toOrganization(organization!), role: "admin" };
     });
   } catch (error) {
-    if (isDuplicateKeyError(error)) throw openRegistrationExists();
+    if (isDuplicateKeyError(error)) throw organizationAlreadyCreated();
     throw error;
   }
 };
@@ -128,14 +126,22 @@ export const listMyOrganizations = async (userId: Types.ObjectId): Promise<MyOrg
   const orgs = await OrganizationModel.find({
     _id: { $in: memberships.map((m) => m.organizationId) },
   })
-    .select("name status")
+    .select("name status createdBy")
     .lean();
 
   const byId = new Map(orgs.map((o) => [String(o._id), o]));
   return memberships
     .map((m) => {
       const org = byId.get(String(m.organizationId));
-      return org && { id: String(org._id), name: org.name, status: org.status, role: m.role };
+      return (
+        org && {
+          id: String(org._id),
+          name: org.name,
+          status: org.status,
+          role: m.role,
+          createdByMe: org.createdBy.equals(userId),
+        }
+      );
     })
     .filter((o): o is MyOrganization => Boolean(o))
     .sort((a, b) => a.name.localeCompare(b.name));
