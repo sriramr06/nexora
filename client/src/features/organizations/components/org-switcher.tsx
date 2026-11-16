@@ -11,7 +11,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useMyOrganizations } from "../org-api";
+import type { MyOrganization } from "@nexora/shared";
 import { OrgStatusBadge } from "./status-badge";
+
+// FR-ORG-09: an organization this user registered that is still Pending or Rejected.
+// Nobody can be invited into such an organization, so its admin is its creator.
+export const openRegistrationOf = (orgs: MyOrganization[]) =>
+  orgs.find(
+    (o) => o.role === "admin" && (o.status === "pending_approval" || o.status === "rejected"),
+  );
 
 // US-08 / FR-ORG-06. Switching changes the URL (/o/:orgId), so every query below it
 // is keyed by the new organization and nothing from the previous one is shown.
@@ -49,10 +57,14 @@ export function OrgSwitcher({ currentOrgId }: { currentOrgId?: string }) {
             </DropdownMenuItem>
           ))}
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate("/organizations/new")}>
-          <PlusIcon aria-hidden /> Register an organization
-        </DropdownMenuItem>
+        {!openRegistrationOf(orgs) && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate("/organizations/new")}>
+              <PlusIcon aria-hidden /> Register an organization
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

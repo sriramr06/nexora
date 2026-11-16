@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { toApiError } from "@/lib/api-error";
 import { OrgStatusBadge } from "@/features/organizations/components/status-badge";
 import { countryName, formatDate } from "@/features/organizations/labels";
+import { OrgActions } from "../components/org-actions";
 import { usePlatformOrganizations } from "../platform-api";
 
 const isStatus = (v: string | null): v is OrgStatus =>
@@ -98,21 +99,22 @@ export function PlatformOrgsPage() {
                 <TableHead className="pl-4">Name</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="hidden sm:table-cell">Country</TableHead>
-                <TableHead className="hidden pr-4 sm:table-cell">Registered</TableHead>
+                <TableHead className="hidden sm:table-cell">Registered</TableHead>
+                <TableHead className="pr-4 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className={cn(query.isPlaceholderData && "opacity-60")}>
               {query.isPending &&
                 [1, 2, 3].map((i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={4} className="px-4">
+                    <TableCell colSpan={5} className="px-4">
                       <Skeleton className="h-5 w-full" />
                     </TableCell>
                   </TableRow>
                 ))}
               {query.data?.data.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                     No organizations match.
                   </TableCell>
                 </TableRow>
@@ -131,8 +133,13 @@ export function PlatformOrgsPage() {
                     <OrgStatusBadge status={org.status} />
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">{countryName(org.country)}</TableCell>
-                  <TableCell className="hidden pr-4 text-muted-foreground sm:table-cell">
+                  <TableCell className="hidden text-muted-foreground sm:table-cell">
                     {formatDate(org.createdAt)}
+                  </TableCell>
+                  <TableCell className="pr-4">
+                    <div className="flex justify-end gap-1.5">
+                      <OrgActions org={org} size="xs" />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
