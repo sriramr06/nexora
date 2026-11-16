@@ -79,7 +79,9 @@ function FlagBadge({ task }: { task: Task }) {
       ) : (
         <PauseIcon className="size-3.5 shrink-0" aria-hidden />
       )}
-      <span className="font-medium">{blocked ? "Blocked" : "On hold"}:</span>
+      <span className="shrink-0 font-medium whitespace-nowrap">
+        {blocked ? "Blocked" : "On hold"}:
+      </span>
       <span className="truncate">{task.flag.reason}</span>
     </span>
   );
@@ -118,7 +120,7 @@ function TaskCard({
         transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined
       }
       className={cn(
-        "group relative grid gap-2 rounded-lg border bg-card p-3 text-left shadow-xs",
+        "group relative grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2 rounded-lg border bg-card p-3 text-left shadow-xs",
         isDragging && "z-10 opacity-80 shadow-md ring-2 ring-ring/30",
         task.flag?.type === "blocked" && "border-destructive/40",
       )}
@@ -195,7 +197,7 @@ function Column({
       ref={setNodeRef}
       aria-label={`${TASK_STATUS_LABELS[status]}, ${tasks.length} tasks`}
       className={cn(
-        "grid min-w-56 content-start gap-2 rounded-xl border bg-muted/40 p-2 transition-colors",
+        "grid min-w-56 grid-cols-[minmax(0,1fr)] content-start gap-2 rounded-xl border bg-muted/40 p-2 transition-colors",
         isOver && "border-ring/50 bg-accent",
       )}
     >

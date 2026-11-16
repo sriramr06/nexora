@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:seed": "tsx --env-file-if-exists=.env src/scripts/seed.ts",
+    "db:seed:demo": "tsx --env-file-if-exists=.env src/scripts/seed-demo.ts",
     "db:sync-indexes": "tsx --env-file-if-exists=.env src/scripts/sync-indexes.ts"
   },
   "dependencies": {

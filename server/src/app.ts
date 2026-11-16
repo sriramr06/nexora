@@ -20,6 +20,7 @@ import { createTaskRouter } from "./modules/tasks/task.routes";
 import { createCommentRouter } from "./modules/comments/comment.routes";
 import { createNotificationRouter } from "./modules/notifications/notification.routes";
 import { createPlatformRouter } from "./modules/platform/platform.routes";
+import { createDocsRouter } from "./modules/docs/docs.routes";
 
 // Creates the Express application without starting a server,
 // so tests can use it directly with Supertest.
@@ -56,6 +57,7 @@ export function createApp() {
   app.use(`${API_PREFIX}/orgs/:orgId`, createCommentRouter());
   app.use(`${API_PREFIX}/orgs/:orgId/notifications`, createNotificationRouter());
   app.use(`${API_PREFIX}/platform`, createPlatformRouter());
+  app.use("/api", createDocsRouter()); // /api/docs and /api/v1/openapi.json
 
   app.use(notFound);
   app.use(errorHandler);
