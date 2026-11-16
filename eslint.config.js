@@ -12,7 +12,7 @@ export default tseslint.config(
 
   // Server and shared code run on Node.js
   {
-    files: ["server/**/*.ts", "packages/**/*.ts", "*.js"],
+    files: ["server/**/*.ts", "packages/**/*.ts", "e2e/**/*.ts", "*.{js,ts}"],
     languageOptions: { globals: globals.node },
   },
 

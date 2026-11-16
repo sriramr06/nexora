@@ -14,17 +14,19 @@
   "scripts": {
     "dev": "concurrently -n server,client -c blue,magenta \"npm run dev -w @nexora/server\" \"npm run dev -w @nexora/client\"",
     "build": "npm run build -w @nexora/server && npm run build -w @nexora/client",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p e2e",
     "test": "npm run test --workspaces --if-present",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "db:seed": "npm run db:seed -w @nexora/server",
-    "db:sync-indexes": "npm run db:sync-indexes -w @nexora/server"
+    "db:sync-indexes": "npm run db:sync-indexes -w @nexora/server",
+    "e2e": "playwright test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.56.1",
     "concurrently": "^10.0.6",
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",

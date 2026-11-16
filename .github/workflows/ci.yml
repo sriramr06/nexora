@@ -41,10 +41,42 @@ jobs:
       - name: Build
         run: npm run build
 
+  # Real browser journeys (J1, J3, J5) against an in-memory database. Runs beside `checks`.
+  e2e:
+    name: End-to-end (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run journeys
+        run: npm run e2e
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
   # Runs only for pushes to main, and only if every check above passed (DEP-6).
   deploy:
     name: Deploy to production
-    needs: checks
+    needs: [checks, e2e]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
