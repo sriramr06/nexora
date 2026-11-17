@@ -151,9 +151,14 @@ export function LandingPage() {
       <footer className="border-t">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 text-sm text-muted-foreground">
           <span>© {new Date().getFullYear()} Nexora</span>
-          <Link to="/login" className="hover:text-foreground">
-            Log in
-          </Link>
+          <span className="flex gap-4">
+            <Link to="/privacy" className="hover:text-foreground">
+              Privacy
+            </Link>
+            <Link to="/login" className="hover:text-foreground">
+              Log in
+            </Link>
+          </span>
         </div>
       </footer>
     </div>
