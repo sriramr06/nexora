@@ -3,7 +3,7 @@
 **Project:** Nexora — Multi-Tenant Project Management SaaS  
 **Phase:** 4 — Implementation Planning  
 **Step:** 4.1 — Implementation Plan  
-**Version:** 1.1 (12 Nov 2026: pace doubled, see §2.1)  
+**Version:** 1.1 (12 Oct 2026: pace doubled, see §2.1)  
 **Status:** Approved
 
 ## 1. Objective
@@ -14,17 +14,17 @@ Turn the Phase 2 requirements and Phase 3 design into a sprint-by-sprint build p
 
 | Item | Decision |
 |---|---|
-| Start date | Friday 6 November 2026 |
+| Start date |  2 October 2026 |
 | Availability | Full-time, 6–8 hours per day |
-| Sprint length | Sprint 1: 10 days (finished 12 Nov); Sprints 2–7: 3–4 days (§2.1) |
-| Planned duration | 7 sprints, ending 3 December 2026 |
-| Reserve | 4 – 10 December 2026 (within the PID's 8-week ceiling) |
+| Sprint length | Sprint 1: 13 days (finished 11 Oct); Sprints 2–7: 6 days (§2.1) |
+| Planned duration | 7 sprints, ending 16 November 2026 |
+| Reserve | 17 – 23 November 2026 (within the PID's 8-week ceiling) |
 | Tracking | Sprint checklist per sprint in `docs/sprints/sprint-N.md` (stories and tasks as checkboxes); pull requests reference story IDs (e.g. "US-03") |
 | Sprint start | Select stories and tasks for the sprint (15 minutes) |
 | Sprint end | Review and retrospective notes in `docs/sprints/sprint-N.md` (15 minutes) |
 | Branching | Feature branches → pull request → protected `main` (DEP-7) |
 
-### 2.1 Pace Change (v1.1, 12 November 2026)
+### 2.1 Pace Change (v1.1, 12 October 2026)
 
 Sprint 1 finished three days early, and the product must be demo-ready for interviews, so the remaining sprints run at double pace with the same scope and cut list:
 
@@ -43,7 +43,7 @@ Sprint 1 finished three days early, and the product must be demo-ready for inter
 
 ## 4. Sprint Plan
 
-### Sprint 1 — Foundations and Authentication (6 – 15 Nov)
+### Sprint 1 — Foundations and Authentication (2 – 14 Oct)
 
 **Goal:** a deployed skeleton with complete authentication.
 
@@ -60,7 +60,7 @@ Sprint 1 finished three days early, and the product must be demo-ready for inter
 
 **Stories:** US-01 – US-05.
 
-### Sprint 2 — Organizations, Platform and Tenancy (13 – 16 Nov)
+### Sprint 2 — Organizations, Platform and Tenancy (12 – 17 Oct)
 
 **Goal:** organizations can register, be approved and be accessed securely.
 
@@ -73,7 +73,7 @@ Sprint 1 finished three days early, and the product must be demo-ready for inter
 
 **Stories:** US-06 – US-11, US-33 (harness).
 
-### Sprint 3 — Members, Invitations and Profile (17 – 19 Nov)
+### Sprint 3 — Members, Invitations and Profile (18 – 23 Oct)
 
 **Goal:** teams can be built and managed.
 
@@ -83,7 +83,7 @@ Sprint 1 finished three days early, and the product must be demo-ready for inter
 
 **Stories:** US-12 – US-16, US-31, US-32, US-34, US-35.
 
-### Sprint 4 — Projects and Tasks Core (20 – 23 Nov)
+### Sprint 4 — Projects and Tasks Core (24 – 29 Oct)
 
 **Goal:** projects and tasks work end to end with history.
 
@@ -95,7 +95,7 @@ Sprint 1 finished three days early, and the product must be demo-ready for inter
 
 **Stories:** US-17 – US-24, US-27.
 
-### Sprint 5 — Kanban and Workflow (24 – 27 Nov)
+### Sprint 5 — Kanban and Workflow (30 Oct – 4 Nov)
 
 **Goal:** the board and review / blocker workflow.
 
@@ -108,7 +108,7 @@ Sprint 1 finished three days early, and the product must be demo-ready for inter
 
 **Stories:** US-25, US-26, US-28, US-36 – US-38, US-19.
 
-### Sprint 6 — Notifications, Rules and Polish (28 – 30 Nov)
+### Sprint 6 — Notifications, Rules and Polish (5 – 10 Nov)
 
 **Goal:** collaboration signals and complete business rules.
 
@@ -119,7 +119,7 @@ Sprint 1 finished three days early, and the product must be demo-ready for inter
 
 **Stories:** US-15 (cascades), US-29, US-30.
 
-### Sprint 7 — Hardening and Release (1 – 3 Dec)
+### Sprint 7 — Hardening and Release (11 – 16 Nov)
 
 **Goal:** a verified, documented, deployed MVP.
 

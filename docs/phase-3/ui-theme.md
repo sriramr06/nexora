@@ -3,7 +3,7 @@
 **Project:** Nexora — Multi-Tenant Project Management SaaS  
 **Phase:** 3 — System Design  
 **Step:** 3.6a — UI Theme (supplements Frontend Architecture)  
-**Version:** 1.1 (Pine Teal, 12 November 2026)  
+**Version:** 1.1 (Pine Teal, 12 October 2026)  
 **Status:** Locked
 
 ## 1. Objective

@@ -1,6 +1,6 @@
 # Sprint 5 — Kanban and Workflow
 
-**Dates:** 24 – 27 November 2026 (plan v1.1; built 12 Nov)  
+**Dates:** 30 October – 4 November 2026 (plan v1.1)  
 **Goal:** the board and the review / blocker workflow.
 
 ## Decisions

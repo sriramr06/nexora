@@ -1,9 +1,9 @@
 # Sprint 4 — Projects and Tasks Core
 
-**Dates:** 20 – 23 November 2026 (plan v1.1; built 12 Nov)  
+**Dates:** 24 – 29 October 2026 (plan v1.1)  
 **Goal:** projects and tasks work end to end with history.
 
-## Decisions (12 Nov 2026)
+## Decisions (24 Oct 2026)
 
 | # | Question | Decision |
 |---|---|---|

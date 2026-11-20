@@ -1,9 +1,9 @@
 # Sprint 3 — Members, Invitations and Profile
 
-**Dates:** 17 – 19 November 2026 (plan v1.1; built 12 Nov)  
+**Dates:** 18 – 23 October 2026 (plan v1.1)  
 **Goal:** teams can be built and managed.
 
-## Decisions (12 Nov 2026)
+## Decisions (18 Oct 2026)
 
 | # | Question | Decision |
 |---|---|---|

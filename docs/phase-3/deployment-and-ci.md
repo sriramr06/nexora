@@ -24,7 +24,7 @@ Define the environments, hosting, continuous integration, deployment process and
 | DEP-8 | End-to-end tests run on `main` only; all other checks run on every push and pull request. |
 | DEP-9 | Production indexes are managed by an explicit script; Mongoose `autoIndex` is disabled in production. |
 | DEP-10 | Backups are taken manually with a `db:backup` script (`mongodump`) before risky deployments; the free tier provides no automated backups. |
-| DEP-11 | Every deployment is **verified**: CI waits until `/api/v1/health` reports the merged commit (`version` = `RENDER_GIT_COMMIT`) and fails after 10 minutes otherwise (added 12 Nov 2026). |
+| DEP-11 | Every deployment is **verified**: CI waits until `/api/v1/health` reports the merged commit (`version` = `RENDER_GIT_COMMIT`) and fails after 10 minutes otherwise (added 12 Oct 2026). |
 
 ## 3. Architecture
 

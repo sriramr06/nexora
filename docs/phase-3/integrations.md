@@ -14,10 +14,10 @@ Define how Nexora integrates with external services (email) and how activity ent
 
 | ID | Decision |
 |---|---|
-| INT-1 | Production email is sent through the **Gmail REST API over HTTPS** (`EMAIL_TRANSPORT=gmail_api`) from the project Gmail account, using an OAuth refresh token with the `gmail.send` scope (~500 emails/day). Reason: Render free instances block outbound SMTP, and Brevo signup required business details (decided 12 Nov 2026). Nodemailer SMTP remains available (`EMAIL_TRANSPORT=smtp`) for hosts that allow it. |
+| INT-1 | Production email is sent through the **Gmail REST API over HTTPS** (`EMAIL_TRANSPORT=gmail_api`) from the project Gmail account, using an OAuth refresh token with the `gmail.send` scope (~500 emails/day). Reason: Render free instances block outbound SMTP, and Brevo signup required business details (decided 12 Oct 2026). Nodemailer SMTP remains available (`EMAIL_TRANSPORT=smtp`) for hosts that allow it. |
 | INT-2 | An `EmailService` interface has four implementations: `GmailApiEmailService` (production), `SmtpEmailService` (alternative), `ConsoleEmailService` (development — prints emails and links), `FakeEmailService` (tests — records sent emails for assertions). All network transports time out after 10 seconds. |
 | INT-3 | Emails are sent **after** the database transaction commits, never inside it. No background queue. |
-| INT-4 | Avatars are uploaded **through the API** and stored in MongoDB (`avatars` collection), with size and byte-level type validation and a 256 × 256 WebP transformation (changed from Cloudinary on 12 Nov 2026). |
+| INT-4 | Avatars are uploaded **through the API** and stored in MongoDB (`avatars` collection), with size and byte-level type validation and a 256 × 256 WebP transformation (changed from Cloudinary on 18 Oct 2026). |
 | INT-5 | Activity entries and notifications are written by **explicit calls inside the same transaction** as the change, not by post-commit events. |
 | INT-6 | No background jobs: expiry is computed, cleanup uses TTL indexes, and emails are sent inline. |
 
@@ -53,7 +53,7 @@ Without a custom domain, emails are sent from a verified personal sender address
 
 ## 4. Avatars (stored in MongoDB)
 
-**Changed 12 Nov 2026:** avatars are stored in MongoDB instead of Cloudinary, so the project needs no extra external account. The upload rules are unchanged.
+**Changed 18 Oct 2026:** avatars are stored in MongoDB instead of Cloudinary, so the project needs no extra external account. The upload rules are unchanged.
 
 ### 4.1 Upload Flow
 

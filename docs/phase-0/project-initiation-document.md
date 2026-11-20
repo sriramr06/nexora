@@ -43,7 +43,7 @@ Approved by the Project Owner during Phase 2 — Requirements Engineering:
 - Organization registration form submitted for Application Owner approval.
 - Email-bound member invitations.
 - Transactional email: email verification, invitations and password reset.
-- User profile avatars stored (resized) in MongoDB (Cloudinary planned originally; changed 12 Nov 2026).
+- User profile avatars stored (resized) in MongoDB (Cloudinary planned originally; changed 18 Oct 2026).
 
 ## 4. Out of Scope
 
@@ -120,14 +120,6 @@ Approved by the Project Owner during Phase 2 — Requirements Engineering:
 
 **Approved deadline:** 6–8 weeks.
 
-**Phase 0 completion:** 6 November 2026.
+**Phase 0 completion:** 2 October 2026.
 
 The project initiation stage is formally closed. Product Discovery is authorized to begin.
-
-## 12. Revision History
-
-| Version | Date            | Change                                                                                                        |
-| ------- | --------------- | ------------------------------------------------------------------------------------------------------------- |
-| 1.0     | 6 November 2026 | Initial approved document.                                                                                    |
-| 1.1     | 6 November 2026 | Project name confirmed as Nexora; terminology clarified. No change to approved scope, timeline or decisions. |
-| 1.2     | 6 November 2026 | Scope additions approved during Phase 2 (Section 3.1); out-of-scope list extended. Timeline unchanged.        |

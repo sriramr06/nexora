@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { EmailMessage, EmailService } from "./email.service";
 
-// INT-1 (12 Nov 2026): production sends through the Gmail REST API over HTTPS (port 443),
+// INT-1 (12 Oct 2026): production sends through the Gmail REST API over HTTPS (port 443),
 // because Render's free instances block outbound SMTP (25 / 465 / 587).
 // Auth: an OAuth refresh token for the sending Gmail account (scope gmail.send).
 
