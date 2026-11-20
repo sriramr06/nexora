@@ -1,6 +1,6 @@
 # Sprint 7 — Hardening and Release
 
-**Dates:** 1 – 3 December 2026 (plan v1.1; built 16 Nov)  
+**Dates:** 11 – 16 November 2026 (plan v1.1)  
 **Goal:** a verified, documented, deployed MVP.
 
 ## Decisions

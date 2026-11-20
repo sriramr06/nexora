@@ -1,9 +1,9 @@
 # Sprint 2 — Organizations, Platform and Tenancy
 
-**Dates:** 13 – 16 November 2026 (plan v1.1, started 12 Nov)  
+**Dates:** 12 – 17 October 2026 (plan v1.1)  
 **Goal:** organizations can register, be approved and be accessed securely.
 
-## Decisions (12 Nov 2026)
+## Decisions (12 Oct 2026)
 
 | # | Question | Decision |
 |---|---|---|

@@ -1,6 +1,6 @@
 # Sprint 6 — Notifications, Rules and Polish
 
-**Dates:** 28 – 30 November 2026 (plan v1.1; built 15 Nov)  
+**Dates:** 5 – 10 November 2026 (plan v1.1)  
 **Goal:** collaboration signals and complete business rules.
 
 ## Decisions

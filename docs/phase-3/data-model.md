@@ -267,7 +267,7 @@ Define the MongoDB collections, fields, constraints and indexes for Nexora, trac
 
 **Rule:** issuing a new token invalidates the user's previous unused tokens of the same type, so only the latest link works.
 
-### 4.12 `avatars` — Added 12 Nov 2026
+### 4.12 `avatars` — Added 18 Oct 2026
 
 | Field | Type | Required | Rules / Notes |
 |---|---|---|---|

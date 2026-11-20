@@ -1,6 +1,6 @@
 # Sprint 1 — Foundations and Authentication
 
-**Dates:** 6 – 15 November 2026  
+**Dates:** 2 – 14 October 2026 (finished 11 Oct)  
 **Goal:** a deployed skeleton with complete authentication.
 
 ## Setup
